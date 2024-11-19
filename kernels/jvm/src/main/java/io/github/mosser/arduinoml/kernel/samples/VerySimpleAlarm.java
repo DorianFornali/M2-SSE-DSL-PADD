@@ -66,8 +66,8 @@ public class VerySimpleAlarm {
         unpressed2pressed.setValue(SIGNAL.HIGH);
 
         // Binding transitions to states
-        pressed.setTransition(pressed2unpressed);
-        unpressed.setTransition(unpressed2pressed);
+        pressed.addTransition(pressed2unpressed);
+        unpressed.addTransition(unpressed2pressed);
 
         // Building the App
         App theAlarm = new App();
