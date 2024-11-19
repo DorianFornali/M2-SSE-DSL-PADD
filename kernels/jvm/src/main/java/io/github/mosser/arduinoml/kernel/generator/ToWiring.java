@@ -112,14 +112,35 @@ public class ToWiring extends Visitor<StringBuffer> {
 			return;
 		}
 		if(context.get("pass") == PASS.TWO) {
-			String sensorName = transition.getSensor().getName();
-			w(String.format("\t\t\t%sBounceGuard = millis() - %sLastDebounceTime > debounce;\n",
-					sensorName, sensorName));
-			w(String.format("\t\t\tif( digitalRead(%d) == %s && %sBounceGuard) {\n",
-					transition.getSensor().getPin(), transition.getValue(), sensorName));
-			w(String.format("\t\t\t\t%sLastDebounceTime = millis();\n", sensorName));
+			for (Sensor sensor : transition.getSensors()) {
+				String sensorName = sensor.getName();
+				w(String.format("\t\t\t%sBounceGuard = millis() - %sLastDebounceTime > debounce;\n",
+						sensorName, sensorName));
+			}
+
+			// Start if
+			w(String.format("\t\t\tif("));
+
+			for (int i = 0; i < transition.getSensors().size(); i++) {
+				Sensor sensor = transition.getSensors().get(i);
+				String sensorName = sensor.getName();
+				w(String.format(" digitalRead(%d) == %s && %sBounceGuard ",
+						sensor.getPin(), transition.getValue(), sensorName));
+				if (i < transition.getSensors().size() - 1) {
+					w("&& ");
+				}
+			}
+
+			// End if
+			w(") {\n");
+			
+			for (Sensor sensor : transition.getSensors()) {
+				String sensorName = sensor.getName();
+				w(String.format("\t\t\t\t%sLastDebounceTime = millis();\n", sensorName));
+			}
 			w("\t\t\t\tcurrentState = " + transition.getNext().getName() + ";\n");
 			w("\t\t\t}\n");
+
 			return;
 		}
 	}
