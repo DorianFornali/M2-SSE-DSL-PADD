@@ -24,7 +24,7 @@ states          :   state+;
  ** Lexer rules **
  *****************/
 
-PORT_NUMBER     :   [1-9] | '11' | '12';
+PORT_NUMBER     :   [1-9] | '11' | '12' | '13';
 IDENTIFIER      :   LOWERCASE (LOWERCASE|UPPERCASE)+;
 SIGNAL          :   'HIGH' | 'LOW';
 
