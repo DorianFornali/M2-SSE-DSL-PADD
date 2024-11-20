@@ -1,5 +1,8 @@
 package io.github.mosser.arduinoml.kernel.generator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.github.mosser.arduinoml.kernel.App;
 import io.github.mosser.arduinoml.kernel.behavioral.*;
 import io.github.mosser.arduinoml.kernel.structural.*;
@@ -114,7 +117,16 @@ public class ToWiring extends Visitor<StringBuffer> {
 			return;
 		}
 		if(context.get("pass") == PASS.TWO) {
-			for (Sensor sensor : transition.getSensors()) {
+			List<Sensor> sensors = transition.getCondition().getSensors();
+			List<Sensor> uniqueSensors = new ArrayList<>();
+			for (Sensor sensor : sensors) {
+				if (!uniqueSensors.contains(sensor)) {
+					uniqueSensors.add(sensor);
+				}
+			}
+
+			// Bounce guard
+			for (Sensor sensor : uniqueSensors) {
 				String sensorName = sensor.getName();
 				w(String.format("\t\t\t%sBounceGuard = millis() - %sLastDebounceTime > debounce;\n",
 						sensorName, sensorName));
@@ -123,20 +135,17 @@ public class ToWiring extends Visitor<StringBuffer> {
 			// Start if
 			w(String.format("\t\t\tif("));
 
-			for (int i = 0; i < transition.getSensors().size(); i++) {
-				Sensor sensor = transition.getSensors().get(i);
+			for (Sensor sensor : uniqueSensors) {
 				String sensorName = sensor.getName();
-				w(String.format(" digitalRead(%d) == %s && %sBounceGuard ",
-						sensor.getPin(), transition.getValue(), sensorName));
-				if (i < transition.getSensors().size() - 1) {
-					w("&& ");
-				}
+				w(String.format(" %sBounceGuard &&", sensorName));
 			}
+
+			transition.getCondition().accept(this);
 
 			// End if
 			w(") {\n");
 			
-			for (Sensor sensor : transition.getSensors()) {
+			for (Sensor sensor : uniqueSensors) {
 				String sensorName = sensor.getName();
 				w(String.format("\t\t\t\t%sLastDebounceTime = millis();\n", sensorName));
 			}
@@ -170,6 +179,21 @@ public class ToWiring extends Visitor<StringBuffer> {
 			w(String.format("\t\t\tdigitalWrite(%d,%s);\n",action.getActuator().getPin(),action.getValue()));
 			return;
 		}
+	}
+
+	@Override
+	public void visit(NodeTree nodeTree) {
+		w(" (");	
+		nodeTree.getLeftTree().accept(this);
+		w(String.format("%s", nodeTree.getOperator()));
+		nodeTree.getRightTree().accept(this);
+		w(")");
+
+	}
+
+	@Override
+	public void visit(Node node) {
+		w(String.format(" digitalRead(%d) == %s ", node.getSensor().getPin(), node.getValue()));
 	}
 
 }

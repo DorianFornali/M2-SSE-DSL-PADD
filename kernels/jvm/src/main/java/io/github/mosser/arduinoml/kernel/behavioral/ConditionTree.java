@@ -1,20 +1,16 @@
 package io.github.mosser.arduinoml.kernel.behavioral;
 
+import java.util.List;
+
 import io.github.mosser.arduinoml.kernel.generator.Visitable;
 import io.github.mosser.arduinoml.kernel.generator.Visitor;
+import io.github.mosser.arduinoml.kernel.structural.Sensor;
 
-public abstract class Transition implements Visitable {
+public abstract class ConditionTree implements Visitable {
 
-	protected State next;
+    public abstract List<Sensor> getSensors();
 
-	public State getNext() {
-		return next;
-	}
-
-	public void setNext(State next) {
-		this.next = next;
-	}
-
-	@Override
+    @Override
 	public abstract void accept(Visitor visitor);
+
 }
