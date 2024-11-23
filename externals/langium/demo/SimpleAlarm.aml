@@ -8,11 +8,11 @@ app SimpleAlarm initial state unpressed {
     unpressed {
       led <= LOW
       buzzer <= LOW
-      button is HIGH => pressed
+      => pressed { button is LOW }
     }
     pressed {
       led <= HIGH
       buzzer <= HIGH
-      button is HIGH => unpressed
+      => unpressed { button is HIGH }
     }
 }

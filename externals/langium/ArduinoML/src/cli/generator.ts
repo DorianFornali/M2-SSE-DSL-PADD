@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { CompositeGeneratorNode, NL, toString } from 'langium';
 import path from 'path';
-import { Action, Actuator, App, Sensor, State, Transition } from '../language-server/generated/ast';
+import { Action, Actuator, App, Condition, ConditionTree, Sensor, State, Transition } from '../language-server/generated/ast';
 import { extractDestinationAndName } from './cli-util';
 
 export function generateInoFile(app: App, filePath: string, destination: string | undefined): string {
@@ -98,13 +98,59 @@ long `+brick.name+`LastDebounceTime = 0;
 					digitalWrite(`+action.actuator.ref?.outputPin+`,`+action.value.value+`);`)
 	}
 
-	function compileTransition(transition: Transition, fileNode:CompositeGeneratorNode) {
-		fileNode.append(`
-		 			`+transition.sensor.ref?.name+`BounceGuard = millis() - `+transition.sensor.ref?.name+`LastDebounceTime > debounce;
-					if( digitalRead(`+transition.sensor.ref?.inputPin+`) == `+transition.value.value+` && `+transition.sensor.ref?.name+`BounceGuard) {
-						`+transition.sensor.ref?.name+`LastDebounceTime = millis();
-						currentState = `+transition.next.ref?.name+`;
-					}
-		`)
-	}
+    function compileTransition(transition: Transition, fileNode: CompositeGeneratorNode) {
+        fileNode.append(`
+            bool conditionMet = false;
+            bool bounceGuard = false;
+        `);
+    
+        // Compile the condition tree with debounce logic
+        compileConditionTree(transition.conditionTree, fileNode, transition.conditionTree.root.trigger.ref?.name);
+    
+        fileNode.append(`
+            if (conditionMet && bounceGuard) {
+                currentState = ` + transition.next.ref?.name + `;
+            }
+        `);
+    }
+    
+    function compileConditionTree(conditionTree: ConditionTree, fileNode: CompositeGeneratorNode, sensorName?: string) {
+        if (conditionTree.right === undefined) {
+            // Single condition with debounce
+            compileCondition(conditionTree.root, fileNode, "conditionMet", sensorName);
+        } else {
+            // Two conditions with an operator and debounce
+            const leftConditionVar = "leftCondition";
+            const rightConditionVar = "rightCondition";
+    
+            // Compile both conditions into their own variables
+            compileCondition(conditionTree.root, fileNode, leftConditionVar, sensorName);
+            compileCondition(conditionTree.right, fileNode, rightConditionVar, sensorName);
+    
+            // Combine the conditions based on the operator
+            const operatorCode =
+                conditionTree.operator!.value === "AND"
+                    ? `${leftConditionVar} && ${rightConditionVar}`
+                    : `${leftConditionVar} || ${rightConditionVar}`;
+            fileNode.append(`
+                conditionMet = ${operatorCode};
+            `);
+        }
+    }
+    
+    function compileCondition(condition: Condition, fileNode: CompositeGeneratorNode, resultVar: string, sensorName?: string) {
+        const sensorPin = condition.trigger.ref?.inputPin;
+        const signalValue = condition.value.value;
+    
+        fileNode.append(`
+            bool ${resultVar} = (digitalRead(${sensorPin}) == ${signalValue});
+    
+            bool ${sensorName}BounceGuard = millis() - ${sensorName}LastDebounceTime > debounce;
+            if (${resultVar} && ${sensorName}BounceGuard) {
+                ${sensorName}LastDebounceTime = millis();
+                bounceGuard = true;
+            }
+        `);
+    }
+    
 

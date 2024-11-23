@@ -87,13 +87,52 @@ function compileAction(action, fileNode) {
 					digitalWrite(` + ((_a = action.actuator.ref) === null || _a === void 0 ? void 0 : _a.outputPin) + `,` + action.value.value + `);`);
 }
 function compileTransition(transition, fileNode) {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b;
     fileNode.append(`
-		 			` + ((_a = transition.sensor.ref) === null || _a === void 0 ? void 0 : _a.name) + `BounceGuard = millis() - ` + ((_b = transition.sensor.ref) === null || _b === void 0 ? void 0 : _b.name) + `LastDebounceTime > debounce;
-					if( digitalRead(` + ((_c = transition.sensor.ref) === null || _c === void 0 ? void 0 : _c.inputPin) + `) == ` + transition.value.value + ` && ` + ((_d = transition.sensor.ref) === null || _d === void 0 ? void 0 : _d.name) + `BounceGuard) {
-						` + ((_e = transition.sensor.ref) === null || _e === void 0 ? void 0 : _e.name) + `LastDebounceTime = millis();
-						currentState = ` + ((_f = transition.next.ref) === null || _f === void 0 ? void 0 : _f.name) + `;
-					}
-		`);
+            bool conditionMet = false;
+            bool bounceGuard = false;
+        `);
+    // Compile the condition tree with debounce logic
+    compileConditionTree(transition.conditionTree, fileNode, (_a = transition.conditionTree.root.trigger.ref) === null || _a === void 0 ? void 0 : _a.name);
+    fileNode.append(`
+            if (conditionMet && bounceGuard) {
+                currentState = ` + ((_b = transition.next.ref) === null || _b === void 0 ? void 0 : _b.name) + `;
+            }
+        `);
+}
+function compileConditionTree(conditionTree, fileNode, sensorName) {
+    if (conditionTree.right === undefined) {
+        // Single condition with debounce
+        compileCondition(conditionTree.root, fileNode, "conditionMet", sensorName);
+    }
+    else {
+        // Two conditions with an operator and debounce
+        const leftConditionVar = "leftCondition";
+        const rightConditionVar = "rightCondition";
+        // Compile both conditions into their own variables
+        compileCondition(conditionTree.root, fileNode, leftConditionVar, sensorName);
+        compileCondition(conditionTree.right, fileNode, rightConditionVar, sensorName);
+        // Combine the conditions based on the operator
+        const operatorCode = conditionTree.operator.value === "AND"
+            ? `${leftConditionVar} && ${rightConditionVar}`
+            : `${leftConditionVar} || ${rightConditionVar}`;
+        fileNode.append(`
+                conditionMet = ${operatorCode};
+            `);
+    }
+}
+function compileCondition(condition, fileNode, resultVar, sensorName) {
+    var _a;
+    const sensorPin = (_a = condition.trigger.ref) === null || _a === void 0 ? void 0 : _a.inputPin;
+    const signalValue = condition.value.value;
+    fileNode.append(`
+            bool ${resultVar} = (digitalRead(${sensorPin}) == ${signalValue});
+    
+            bool ${sensorName}BounceGuard = millis() - ${sensorName}LastDebounceTime > debounce;
+            if (${resultVar} && ${sensorName}BounceGuard) {
+                ${sensorName}LastDebounceTime = millis();
+                bounceGuard = true;
+            }
+        `);
 }
 //# sourceMappingURL=generator.js.map

@@ -34,13 +34,24 @@ State :
 Action :
 	actuator=[Actuator:ID] '<=' value=Signal;
 
-Transition :
-	sensor=[Sensor:ID] 'is' value=Signal '=>' next=[State:ID];
+Transition:
+    '=>' next=[State:ID] '{' conditionTree=ConditionTree '}';
+
+ConditionTree:
+    root=Condition (operator=Operator right=Condition)?;
+
+Condition:
+    trigger=[Sensor:ID] 'is' value=Signal;
 
 Signal:
     value=(HIGH | LOW);
 terminal HIGH : 'HIGH';
 terminal LOW : 'LOW';
+
+Operator:
+		value=(AND | OR);
+terminal AND : 'AND';
+terminal OR : 'OR';
 
 hidden terminal WS: /\s+/;
 terminal ID: /[_a-zA-Z][\w_]*/;

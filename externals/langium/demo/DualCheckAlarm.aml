@@ -1,0 +1,16 @@
+app DualCheckAlarm initial state unpressed {
+  bricks
+    Actuator buzzer : 13
+    Sensor buttonone : 9
+    Sensor buttontwo : 10
+
+  states
+    unpressed {
+      buzzer <= LOW
+      => pressed { buttonone is LOW AND buttontwo is LOW }
+    }
+    pressed {
+      buzzer <= HIGH
+      => unpressed { buttonone is HIGH OR buttontwo is HIGH }
+    }
+}
