@@ -4,12 +4,10 @@ import io.github.mosser.arduinoml.externals.antlr.grammar.*;
 
 
 import io.github.mosser.arduinoml.kernel.App;
-import io.github.mosser.arduinoml.kernel.behavioral.Action;
-import io.github.mosser.arduinoml.kernel.behavioral.SignalTransition;
-import io.github.mosser.arduinoml.kernel.behavioral.State;
-import io.github.mosser.arduinoml.kernel.behavioral.Transition;
+import io.github.mosser.arduinoml.kernel.behavioral.*;
 import io.github.mosser.arduinoml.kernel.structural.Actuator;
 import io.github.mosser.arduinoml.kernel.structural.SIGNAL;
+import io.github.mosser.arduinoml.kernel.structural.OPERATOR;
 import io.github.mosser.arduinoml.kernel.structural.Sensor;
 
 import java.util.HashMap;
@@ -40,8 +38,7 @@ public class ModelBuilder extends ArduinomlBaseListener {
 
     private class Binding { // used to support state resolution for transitions
         String to; // name of the next state, as its instance might not have been compiled yet
-        Sensor trigger;
-        SIGNAL value;
+        ConditionTree condition;
     }
 
     private State currentState = null;
@@ -60,10 +57,9 @@ public class ModelBuilder extends ArduinomlBaseListener {
         // Resolving states in transitions
         bindings.forEach((key, binding) ->  {
             SignalTransition t = new SignalTransition();
-            t.setSensor(binding.trigger);
-            t.setValue(binding.value);
+            t.setCondition(binding.condition);
             t.setNext(states.get(binding.to));
-            states.get(key).setTransition(t);
+            states.get(key).addTransition(t);
         });
         this.built = true;
     }
@@ -115,18 +111,41 @@ public class ModelBuilder extends ArduinomlBaseListener {
 
     @Override
     public void enterTransition(ArduinomlParser.TransitionContext ctx) {
-        // Creating a placeholder as the next state might not have been compiled yet.
         Binding toBeResolvedLater = new Binding();
-        toBeResolvedLater.to      = ctx.next.getText();
-        toBeResolvedLater.trigger = sensors.get(ctx.trigger.getText());
-        toBeResolvedLater.value   = SIGNAL.valueOf(ctx.value.getText());
+        toBeResolvedLater.to = ctx.next.getText();
+        toBeResolvedLater.condition = parseSimpleCondition(ctx.conditionTree());
         bindings.put(currentState.getName(), toBeResolvedLater);
     }
+
+    private ConditionTree parseSimpleCondition(ArduinomlParser.ConditionTreeContext ctx) {
+        if (ctx.OPERATOR() == null) {
+            Node node = new Node();
+            node.setSensor(sensors.get(ctx.condition(0).trigger.getText()));
+            node.setValue(SIGNAL.valueOf(ctx.condition(0).value.getText()));
+            return node;
+        } else {
+            NodeTree nodeTree = new NodeTree();
+            nodeTree.setOperator(OPERATOR.valueOf(ctx.OPERATOR().getText()));
+
+            Node left = new Node();
+            left.setSensor(sensors.get(ctx.condition(0).trigger.getText()));
+            left.setValue(SIGNAL.valueOf(ctx.condition(0).value.getText()));
+
+            Node right = new Node();
+            right.setSensor(sensors.get(ctx.condition(1).trigger.getText()));
+            right.setValue(SIGNAL.valueOf(ctx.condition(1).value.getText()));
+
+            nodeTree.setLeftTree(left);
+            nodeTree.setRightTree(right);
+
+            return nodeTree;
+        }
+    }
+
 
     @Override
     public void enterInitial(ArduinomlParser.InitialContext ctx) {
         this.theApp.setInitial(this.currentState);
     }
-
 }
 

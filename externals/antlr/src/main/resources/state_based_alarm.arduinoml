@@ -1,4 +1,4 @@
-application redButton
+application simpleAlarm
 
 # Declaring bricks
 sensor button: 9
@@ -8,7 +8,7 @@ actuator led: 12
 on {
     led <= HIGH
     => off {
-        button is HIGH
+        button is LOW
     }
 }
 

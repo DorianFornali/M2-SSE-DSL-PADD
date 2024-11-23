@@ -1,0 +1,28 @@
+application multiStateAlarm
+
+sensor button : 9
+actuator led : 12
+actuator buzzer : 13
+
+-> initial {
+    led <= LOW
+    buzzer <= LOW
+    => buzzerOn {
+        button is LOW
+    }
+}
+
+buzzerOn {
+    buzzer <= HIGH
+    => ledOn {
+        button is LOW
+    }
+}
+
+ledOn {
+    led <= HIGH
+    buzzer <= LOW
+    => initial {
+        button is LOW
+    }
+}

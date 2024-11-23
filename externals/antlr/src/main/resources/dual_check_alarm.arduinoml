@@ -1,0 +1,19 @@
+application dualCheckAlarm
+
+sensor buttonone : 9
+sensor buttontwo : 10
+actuator buzzer : 13
+
+-> unpressed {
+    buzzer <= LOW
+    => pressed {
+        buttonone is LOW AND buttontwo is LOW
+    }
+}
+
+pressed {
+    buzzer <= HIGH
+    => unpressed {
+        buttonone is HIGH OR buttontwo is HIGH
+    }
+}
