@@ -40,4 +40,9 @@ public class Node extends ConditionTree {
         visitor.visit(this);
     }
 
+    @Override
+    public String toPrettyString() {
+        return String.format("%s == %s", sensor.getName(), value);
+    }
+
 }

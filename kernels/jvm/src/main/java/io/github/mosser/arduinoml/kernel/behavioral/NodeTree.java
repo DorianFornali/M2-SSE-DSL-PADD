@@ -50,5 +50,22 @@ public class NodeTree extends ConditionTree {
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public String toPrettyString() {
+        String left = "";
+        if(leftTree != null) {
+            left = leftTree.toPrettyString();
+        }
+
+        String right = "";
+        if(rightTree != null) {
+            right = rightTree.toPrettyString();
+        }
+
+
+        return String.format("%s %s %s", left, operator, right);
+
+    }
     
 }

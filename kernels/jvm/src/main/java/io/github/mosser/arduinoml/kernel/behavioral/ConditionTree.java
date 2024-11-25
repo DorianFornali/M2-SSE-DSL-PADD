@@ -13,4 +13,6 @@ public abstract class ConditionTree implements Visitable {
     @Override
 	public abstract void accept(Visitor visitor);
 
+    public abstract String toPrettyString();
+
 }

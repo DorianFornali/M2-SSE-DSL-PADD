@@ -43,6 +43,9 @@ public class ConditionTreeBuilder{
         nodeTreeBuilder.local.setLeftTree(node);
         nodeTreeBuilder.local.setOperator(OPERATOR.AND);
         parent.local.setCondition(nodeTreeBuilder.local);
+        System.out.println("Found an and, delegating to NodeTreeBuilder");
+        System.out.print("Current condition: ");
+        System.out.println(nodeTreeBuilder.local.toPrettyString());
         return nodeTreeBuilder;
     }
 
@@ -66,7 +69,7 @@ public class ConditionTreeBuilder{
         node.setSensor(currentNodeSensor);
         node.setValue(currentNodeValue);
         // node.setOperator(currentNodeOperator);
-        parent.local.setCondition(node);
+
         return parent;
     }
 

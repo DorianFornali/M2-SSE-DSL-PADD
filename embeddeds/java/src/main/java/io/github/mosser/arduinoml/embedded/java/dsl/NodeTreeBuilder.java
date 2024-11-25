@@ -68,6 +68,9 @@ public class NodeTreeBuilder {
         node.setSensor(currentNodeSensor);
         node.setValue(currentNodeValue);
         local.setRightTree(node);
+        System.out.println("Ending condition tree, returning to TransitionBuilder");
+        System.out.print("Current condition tree: ");
+        System.out.println(local.toPrettyString());
         return parent;
     }
 
