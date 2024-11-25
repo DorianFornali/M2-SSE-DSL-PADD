@@ -1,6 +1,8 @@
 import io.github.mosser.arduinoml.kernel.App;
 import io.github.mosser.arduinoml.kernel.generator.ToWiring;
 import io.github.mosser.arduinoml.kernel.generator.Visitor;
+import io.github.mosser.arduinoml.kernel.structural.OPERATOR;
+import io.github.mosser.arduinoml.kernel.structural.SIGNAL;
 
 import static io.github.mosser.arduinoml.embedded.java.dsl.AppBuilder.*;
 
@@ -20,8 +22,15 @@ public class Main {
                             .setting("led").toLow()
                         .endState()
                         .beginTransitionTable()
-                            .from("on").when("button").isHigh().goTo("off")
-                            .from("off").when("button").isHigh().goTo("on")
+                            .from("on").when().sensor("button").equals()
+                        .value(SIGNAL.HIGH)
+                        .and()
+                        .sensor("button")
+                        .equals()
+                        .value(SIGNAL.LOW)
+                        .endConditionTree()
+                        .closeWhen()
+                        .goTo("off")
                         .endTransitionTable()
                 .build();
 

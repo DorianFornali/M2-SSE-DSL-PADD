@@ -8,30 +8,21 @@ import io.github.mosser.arduinoml.kernel.structural.SIGNAL;
 public class TransitionBuilder {
 
 
-    private TransitionTableBuilder parent;
+    TransitionTableBuilder parent;
 
-    private SignalTransition local;
+    SignalTransition local;
+
+    private ConditionTreeBuilder conditionTreeBuilder;
 
     TransitionBuilder(TransitionTableBuilder parent, String source) {
         this.parent = parent;
         this.local = new SignalTransition();
-        parent.findState(source).setTransition(local);
+        parent.findState(source).addTransition(local);
     }
 
 
-    public TransitionBuilder when(String sensor) {
-        local.setSensor(parent.findSensor(sensor));
-        return this;
-    }
-
-    public TransitionBuilder isHigh() {
-        local.setValue(SIGNAL.HIGH);
-        return this;
-    }
-
-    public TransitionBuilder isLow() {
-        local.setValue(SIGNAL.LOW);
-        return this;
+    public ConditionTreeBuilder when() {
+        return new ConditionTreeBuilder(this);
     }
 
     public TransitionTableBuilder goTo(String state) {
