@@ -1,8 +1,9 @@
 package io.github.mosser.arduinoml.kernel.samples;
 
 import io.github.mosser.arduinoml.kernel.App;
-import io.github.mosser.arduinoml.kernel.behavioral.Action;
-import io.github.mosser.arduinoml.kernel.behavioral.NodeTree;
+import io.github.mosser.arduinoml.kernel.behavioral.BooleanCondition;
+import io.github.mosser.arduinoml.kernel.behavioral.DigitalAction;
+import io.github.mosser.arduinoml.kernel.behavioral.DigitalCondition;
 import io.github.mosser.arduinoml.kernel.behavioral.SignalTransition;
 import io.github.mosser.arduinoml.kernel.behavioral.State;
 import io.github.mosser.arduinoml.kernel.generator.ToWiring;
@@ -11,7 +12,6 @@ import io.github.mosser.arduinoml.kernel.structural.Actuator;
 import io.github.mosser.arduinoml.kernel.structural.OPERATOR;
 import io.github.mosser.arduinoml.kernel.structural.SIGNAL;
 import io.github.mosser.arduinoml.kernel.structural.Sensor;
-import io.github.mosser.arduinoml.kernel.behavioral.Node;
 
 import java.util.Arrays;
 
@@ -39,11 +39,11 @@ public class DualCheckAlarm {
         pressed.setName("pressed");
 
         // Creating actions
-        Action switchTheBuzzerOn = new Action();
+        DigitalAction switchTheBuzzerOn = new DigitalAction();
         switchTheBuzzerOn.setActuator(buzzer);
         switchTheBuzzerOn.setValue(SIGNAL.HIGH);
 
-        Action switchTheBuzzerOff = new Action();
+        DigitalAction switchTheBuzzerOff = new DigitalAction();
         switchTheBuzzerOff.setActuator(buzzer);
         switchTheBuzzerOff.setValue(SIGNAL.LOW);
 
@@ -54,13 +54,13 @@ public class DualCheckAlarm {
         // Creating transitions
         SignalTransition unpressed2pressed = new SignalTransition();
         unpressed2pressed.setNext(pressed);
-        NodeTree unpressed2pressedCondition = new NodeTree();
+        BooleanCondition unpressed2pressedCondition = new BooleanCondition();
         unpressed2pressedCondition.setOperator(OPERATOR.AND);
-        Node nodeButt1 = new Node();
+        DigitalCondition nodeButt1 = new DigitalCondition();
         nodeButt1.setSensor(button1);
         nodeButt1.setValue(SIGNAL.HIGH);
         unpressed2pressedCondition.setLeftTree(nodeButt1);
-        Node nodeButt2 = new Node();
+        DigitalCondition nodeButt2 = new DigitalCondition();
         nodeButt2.setSensor(button2);
         nodeButt2.setValue(SIGNAL.HIGH);
         unpressed2pressedCondition.setRightTree(nodeButt2);
@@ -68,13 +68,13 @@ public class DualCheckAlarm {
 
         SignalTransition pressed2unpressed = new SignalTransition();
         pressed2unpressed.setNext(unpressed);
-        NodeTree pressed2unpressedCondition = new NodeTree();
+        BooleanCondition pressed2unpressedCondition = new BooleanCondition();
         pressed2unpressedCondition.setOperator(OPERATOR.OR);
-        Node nodeButt1Unpressed = new Node();
+        DigitalCondition nodeButt1Unpressed = new DigitalCondition();
         nodeButt1Unpressed.setSensor(button1);
         nodeButt1Unpressed.setValue(SIGNAL.LOW);
         pressed2unpressedCondition.setLeftTree(nodeButt1Unpressed);
-        Node nodeButt2Unpressed = new Node();
+        DigitalCondition nodeButt2Unpressed = new DigitalCondition();
         nodeButt2Unpressed.setSensor(button2);
         nodeButt2Unpressed.setValue(SIGNAL.LOW);
         pressed2unpressedCondition.setRightTree(nodeButt2Unpressed);

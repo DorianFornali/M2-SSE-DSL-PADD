@@ -1,8 +1,8 @@
 package io.github.mosser.arduinoml.kernel.samples;
 
 import io.github.mosser.arduinoml.kernel.App;
-import io.github.mosser.arduinoml.kernel.behavioral.Action;
-import io.github.mosser.arduinoml.kernel.behavioral.Node;
+import io.github.mosser.arduinoml.kernel.behavioral.DigitalAction;
+import io.github.mosser.arduinoml.kernel.behavioral.DigitalCondition;
 import io.github.mosser.arduinoml.kernel.behavioral.SignalTransition;
 import io.github.mosser.arduinoml.kernel.behavioral.State;
 import io.github.mosser.arduinoml.kernel.generator.ToWiring;
@@ -39,19 +39,19 @@ public class MultiStateAlarm {
         State ledOn = new State();
         ledOn.setName("ledOn");
 
-        Action switchTheBuzzerOn = new Action();
+        DigitalAction switchTheBuzzerOn = new DigitalAction();
         switchTheBuzzerOn.setActuator(buzzer);
         switchTheBuzzerOn.setValue(SIGNAL.HIGH);
 
-        Action switchTheBuzzerOff = new Action();
+        DigitalAction switchTheBuzzerOff = new DigitalAction();
         switchTheBuzzerOff.setActuator(buzzer);
         switchTheBuzzerOff.setValue(SIGNAL.LOW);
 
-        Action switchTheLedOn = new Action();
+        DigitalAction switchTheLedOn = new DigitalAction();
         switchTheLedOn.setActuator(led);
         switchTheLedOn.setValue(SIGNAL.HIGH);
 
-        Action switchTheLedOff = new Action();
+        DigitalAction switchTheLedOff = new DigitalAction();
         switchTheLedOff.setActuator(led);
         switchTheLedOff.setValue(SIGNAL.LOW);
 
@@ -63,21 +63,21 @@ public class MultiStateAlarm {
         // Creating transitions
         SignalTransition initial2buzzerOn = new SignalTransition();
         initial2buzzerOn.setNext(buzzerOn);
-        Node initial2BuzzerOnCondition = new Node();
+        DigitalCondition initial2BuzzerOnCondition = new DigitalCondition();
         initial2BuzzerOnCondition.setSensor(button);
         initial2BuzzerOnCondition.setValue(SIGNAL.HIGH);
         initial2buzzerOn.setCondition(initial2BuzzerOnCondition);
 
         SignalTransition buzzerOn2LedOn = new SignalTransition();
         buzzerOn2LedOn.setNext(ledOn);
-        Node buzzerOn2LedOnCondition = new Node();
+        DigitalCondition buzzerOn2LedOnCondition = new DigitalCondition();
         buzzerOn2LedOnCondition.setSensor(button);
         buzzerOn2LedOnCondition.setValue(SIGNAL.HIGH);
         buzzerOn2LedOn.setCondition(buzzerOn2LedOnCondition);
 
         SignalTransition ledOn2Initial = new SignalTransition();
         ledOn2Initial.setNext(initial);
-        Node ledOn2InitialCondition = new Node();
+        DigitalCondition ledOn2InitialCondition = new DigitalCondition();
         ledOn2InitialCondition.setSensor(button);
         ledOn2InitialCondition.setValue(SIGNAL.HIGH);
         ledOn2Initial.setCondition(ledOn2InitialCondition);

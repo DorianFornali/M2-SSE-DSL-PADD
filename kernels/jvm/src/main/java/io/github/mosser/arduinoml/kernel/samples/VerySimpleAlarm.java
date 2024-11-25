@@ -1,8 +1,8 @@
 package io.github.mosser.arduinoml.kernel.samples;
 
 import io.github.mosser.arduinoml.kernel.App;
-import io.github.mosser.arduinoml.kernel.behavioral.Action;
-import io.github.mosser.arduinoml.kernel.behavioral.Node;
+import io.github.mosser.arduinoml.kernel.behavioral.DigitalAction;
+import io.github.mosser.arduinoml.kernel.behavioral.DigitalCondition;
 import io.github.mosser.arduinoml.kernel.behavioral.SignalTransition;
 import io.github.mosser.arduinoml.kernel.behavioral.State;
 import io.github.mosser.arduinoml.kernel.generator.ToWiring;
@@ -37,17 +37,17 @@ public class VerySimpleAlarm {
         unpressed.setName("unpressed");
 
         // Creating actions
-        Action switchTheBuzzerOn = new Action();
+        DigitalAction switchTheBuzzerOn = new DigitalAction();
         switchTheBuzzerOn.setActuator(buzzer);
         switchTheBuzzerOn.setValue(SIGNAL.HIGH);
-        Action switchTheLedOn = new Action();
+        DigitalAction switchTheLedOn = new DigitalAction();
         switchTheLedOn.setActuator(led);
         switchTheLedOn.setValue(SIGNAL.HIGH);
 
-        Action switchTheBuzzerOff = new Action();
+        DigitalAction switchTheBuzzerOff = new DigitalAction();
         switchTheBuzzerOff.setActuator(buzzer);
         switchTheBuzzerOff.setValue(SIGNAL.LOW);
-        Action switchTheLedOff = new Action();
+        DigitalAction switchTheLedOff = new DigitalAction();
         switchTheLedOff.setActuator(led);
         switchTheLedOff.setValue(SIGNAL.LOW);
 
@@ -58,14 +58,14 @@ public class VerySimpleAlarm {
         // Creating transitions
         SignalTransition pressed2unpressed = new SignalTransition();
         pressed2unpressed.setNext(unpressed);
-        Node pressed2unpressedCondition = new Node();
+        DigitalCondition pressed2unpressedCondition = new DigitalCondition();
         pressed2unpressedCondition.setSensor(button);
         pressed2unpressedCondition.setValue(SIGNAL.LOW);
         pressed2unpressed.setCondition(pressed2unpressedCondition);
 
         SignalTransition unpressed2pressed = new SignalTransition();
         unpressed2pressed.setNext(pressed);
-        Node unpressed2pressedCondition = new Node();
+        DigitalCondition unpressed2pressedCondition = new DigitalCondition();
         unpressed2pressedCondition.setSensor(button);
         unpressed2pressedCondition.setValue(SIGNAL.HIGH);
         unpressed2pressed.setCondition(unpressed2pressedCondition);

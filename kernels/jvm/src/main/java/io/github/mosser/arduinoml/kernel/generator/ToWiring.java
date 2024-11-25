@@ -13,7 +13,6 @@ import io.github.mosser.arduinoml.kernel.structural.*;
 public class ToWiring extends Visitor<StringBuffer> {
 	enum PASS {ONE, TWO}
 
-
 	public ToWiring() {
 		this.result = new StringBuffer();
 	}
@@ -171,29 +170,47 @@ public class ToWiring extends Visitor<StringBuffer> {
 	}
 
 	@Override
-	public void visit(Action action) {
+	public void visit(DigitalAction digitalAction) {
 		if(context.get("pass") == PASS.ONE) {
 			return;
 		}
+
 		if(context.get("pass") == PASS.TWO) {
-			w(String.format("\t\t\tdigitalWrite(%d,%s);\n",action.getActuator().getPin(),action.getValue()));
+			w(String.format("\t\t\tdigitalWrite(%d,%s);\n",digitalAction.getActuator().getPin(), digitalAction.getValue()));
 			return;
 		}
 	}
 
 	@Override
-	public void visit(NodeTree nodeTree) {
-		w(" (");	
-		nodeTree.getLeftTree().accept(this);
-		w(String.format("%s", nodeTree.getOperator()));
-		nodeTree.getRightTree().accept(this);
-		w(")");
+	public void visit(AnalogAction analogAction) {
+		if(context.get("pass") == PASS.ONE) {
+			return;
+		}
 
+		if(context.get("pass") == PASS.TWO) {
+			Constant constant = analogAction.getValue();
+			w(String.format("\t\t\tanalogWrite(%d,%f);\n",analogAction.getActuator().getPin(), constant.getValue()));
+			return;
+		}
 	}
 
 	@Override
-	public void visit(Node node) {
-		w(String.format(" digitalRead(%d) == %s ", node.getSensor().getPin(), node.getValue()));
+	public void visit(BooleanCondition booleanCondition) {
+		w(" (");	
+		booleanCondition.getLeftTree().accept(this);
+		w(String.format("%s", booleanCondition.getOperator()));
+		booleanCondition.getRightTree().accept(this);
+		w(")");
+	}
+
+	@Override
+	public void visit(DigitalCondition digitalCondition) {
+		w(String.format(" digitalRead(%d) == %s ", digitalCondition.getSensor().getPin(), digitalCondition.getValue()));
+	}
+
+	@Override
+	public void visit(AnalogCondition analogCondition) {
+		w(String.format(" analogRead(%d) %s %f ", analogCondition.getSensor().getPin(), analogCondition.getComparator(), analogCondition.getValue().getValue()));
 	}
 
 }

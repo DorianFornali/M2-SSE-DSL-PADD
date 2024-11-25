@@ -1,8 +1,8 @@
 package io.github.mosser.arduinoml.kernel.samples;
 
 import io.github.mosser.arduinoml.kernel.App;
-import io.github.mosser.arduinoml.kernel.behavioral.Action;
-import io.github.mosser.arduinoml.kernel.behavioral.Node;
+import io.github.mosser.arduinoml.kernel.behavioral.DigitalAction;
+import io.github.mosser.arduinoml.kernel.behavioral.DigitalCondition;
 import io.github.mosser.arduinoml.kernel.behavioral.SignalTransition;
 import io.github.mosser.arduinoml.kernel.behavioral.State;
 import io.github.mosser.arduinoml.kernel.generator.ToWiring;
@@ -32,11 +32,11 @@ public class StateBasedAlarm {
         State off = new State();
         off.setName("off");
 
-        Action switchTheLedOn = new Action();
+        DigitalAction switchTheLedOn = new DigitalAction();
         switchTheLedOn.setActuator(led);
         switchTheLedOn.setValue(SIGNAL.HIGH);
 
-        Action switchTheLedOff = new Action();
+        DigitalAction switchTheLedOff = new DigitalAction();
         switchTheLedOff.setActuator(led);
         switchTheLedOff.setValue(SIGNAL.LOW);
 
@@ -47,14 +47,14 @@ public class StateBasedAlarm {
         // Creating transitions
         SignalTransition on2off = new SignalTransition();
         on2off.setNext(off);
-        Node on2offCondition = new Node();
+        DigitalCondition on2offCondition = new DigitalCondition();
         on2offCondition.setSensor(button);
         on2offCondition.setValue(SIGNAL.HIGH);
         on2off.setCondition(on2offCondition);
 
         SignalTransition off2on = new SignalTransition();
         off2on.setNext(on);
-        Node off2onCondition = new Node();
+        DigitalCondition off2onCondition = new DigitalCondition();
         off2onCondition.setSensor(button);
         off2onCondition.setValue(SIGNAL.HIGH);
         off2on.setCondition(off2onCondition);
