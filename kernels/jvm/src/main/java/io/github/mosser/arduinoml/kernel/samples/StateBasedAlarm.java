@@ -49,14 +49,14 @@ public class StateBasedAlarm {
         on2off.setNext(off);
         Node on2offCondition = new Node();
         on2offCondition.setSensor(button);
-        on2offCondition.setValue(SIGNAL.LOW);
+        on2offCondition.setValue(SIGNAL.HIGH);
         on2off.setCondition(on2offCondition);
 
         SignalTransition off2on = new SignalTransition();
         off2on.setNext(on);
         Node off2onCondition = new Node();
         off2onCondition.setSensor(button);
-        off2onCondition.setValue(SIGNAL.LOW);
+        off2onCondition.setValue(SIGNAL.HIGH);
         off2on.setCondition(off2onCondition);
 
         // Binding transitions to states

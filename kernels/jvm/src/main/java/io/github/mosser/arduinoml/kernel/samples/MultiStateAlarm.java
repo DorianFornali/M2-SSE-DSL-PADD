@@ -65,21 +65,21 @@ public class MultiStateAlarm {
         initial2buzzerOn.setNext(buzzerOn);
         Node initial2BuzzerOnCondition = new Node();
         initial2BuzzerOnCondition.setSensor(button);
-        initial2BuzzerOnCondition.setValue(SIGNAL.LOW);
+        initial2BuzzerOnCondition.setValue(SIGNAL.HIGH);
         initial2buzzerOn.setCondition(initial2BuzzerOnCondition);
 
         SignalTransition buzzerOn2LedOn = new SignalTransition();
         buzzerOn2LedOn.setNext(ledOn);
         Node buzzerOn2LedOnCondition = new Node();
         buzzerOn2LedOnCondition.setSensor(button);
-        buzzerOn2LedOnCondition.setValue(SIGNAL.LOW);
+        buzzerOn2LedOnCondition.setValue(SIGNAL.HIGH);
         buzzerOn2LedOn.setCondition(buzzerOn2LedOnCondition);
 
         SignalTransition ledOn2Initial = new SignalTransition();
         ledOn2Initial.setNext(initial);
         Node ledOn2InitialCondition = new Node();
         ledOn2InitialCondition.setSensor(button);
-        ledOn2InitialCondition.setValue(SIGNAL.LOW);
+        ledOn2InitialCondition.setValue(SIGNAL.HIGH);
         ledOn2Initial.setCondition(ledOn2InitialCondition);
 
         // Binding transitions to states
