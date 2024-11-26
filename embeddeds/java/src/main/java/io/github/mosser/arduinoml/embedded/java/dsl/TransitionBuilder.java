@@ -12,7 +12,7 @@ public class TransitionBuilder {
 
     SignalTransition local;
 
-    private ConditionTreeBuilder conditionTreeBuilder;
+    private _ConditionTreeBuilder conditionTreeBuilder;
 
     TransitionBuilder(TransitionTableBuilder parent, String source) {
         this.parent = parent;
@@ -21,8 +21,8 @@ public class TransitionBuilder {
     }
 
 
-    public ConditionTreeBuilder when() {
-        return new ConditionTreeBuilder(this);
+    public _ConditionTreeBuilder when() {
+        return new _ConditionTreeBuilder(this);
     }
 
     public TransitionTableBuilder goTo(String state) {
