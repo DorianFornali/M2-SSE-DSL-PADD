@@ -48,55 +48,14 @@ abstract class GroovuinoMLBasescript extends Script {
 
 	// from state1 to state2 when sensor becomes signal [and/or sensor becomes signal]*n done
 	def from(state1) {
-		println "From called with state1 ${state1}"
-		[to: { state2 ->
-			println "Transition from ${state1} to ${state2}"
-			def transitionBuilder = new TransitionBuilder(
-					state1 instanceof String ? (State)((GroovuinoMLBinding)this.getBinding()).getVariable(state1) : (State)state1,
-					state2 instanceof String ? (State)((GroovuinoMLBinding)this.getBinding()).getVariable(state2) : (State)state2
-			)
-
-			def conditionClosure = { operator = "AND" ->
-				println "Condition closure called ${operator}"
-				println "this.getBinding().properties ${this.getBinding().properties.toString()}"
-				println "this.getBinding().variables ${this.getBinding().variables.toString()}"
-				[when: { sensor ->
-					println "When called with sensor ${sensor}"
-					[becomes: { signal ->
-						println "Becomes called with signal ${signal}"
-						transitionBuilder.addCondition(
-								sensor instanceof String ? (Sensor)((GroovuinoMLBinding)this.getBinding()).getVariable(sensor) : (Sensor)sensor,
-								signal instanceof String ? (SIGNAL)((GroovuinoMLBinding)this.getBinding()).getVariable(signal) : (SIGNAL)signal,
-								operator
-						)
-						[and: conditionClosure.curry("AND"), or: conditionClosure.curry("OR")]
-					}]
-				}]
-			}
-
-			return [
-					when: conditionClosure(),
-					done: {
-						transitionBuilder.finalizeTransition(this.getBinding() as GroovuinoMLBinding)
-					}
-			]
-		}]
-	}
-
-	def from2(state1) {
-		println "From2 called with state1 ${state1}"
 		[to: { state2 ->
 			def transitionBuilder = new TransitionBuilder(
 					state1 instanceof String ? (State)((GroovuinoMLBinding)this.getBinding()).getVariable(state1) : (State)state1,
 					state2 instanceof String ? (State)((GroovuinoMLBinding)this.getBinding()).getVariable(state2) : (State)state2
 			)
-			println "Transition from ${state1} to ${state2}"
-
 			def closure
 			closure = { sensor, operator = null ->
-				println "When called with sensor ${sensor} and operator ${operator}"
 				[becomes: { signal ->
-					println "Becomes called with signal ${signal}"
 					transitionBuilder.addCondition(
 							sensor instanceof String ? (Sensor)((GroovuinoMLBinding)this.getBinding()).getVariable(sensor) : (Sensor)sensor,
 							signal instanceof String ? (SIGNAL)((GroovuinoMLBinding)this.getBinding()).getVariable(signal) : (SIGNAL)signal,
@@ -150,7 +109,6 @@ class TransitionBuilder {
 	}
 
 	void finalizeTransition(GroovuinoMLBinding binding) {
-		println "Finalizing transition from ${fromState} to ${toState} with conditions ${conditions}"
 		((GroovuinoMLBinding) binding).getGroovuinoMLModel().createTransition(fromState, toState, conditions)
 	}
 }

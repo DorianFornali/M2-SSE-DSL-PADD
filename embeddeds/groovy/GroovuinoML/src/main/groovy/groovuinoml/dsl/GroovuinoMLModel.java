@@ -66,29 +66,29 @@ public class GroovuinoMLModel {
 		if (conditions.size() == 1) {
 			Node node = new Node();
 			Map<String, Object> condition = conditions.get(0);
-			String sensorName = (String) condition.get("sensor");
+			String sensorName = ((Sensor) condition.get("sensor")).getName();
 			Sensor sensor = (Sensor) this.binding.getVariable(sensorName);
-			SIGNAL value = (SIGNAL) condition.get("value");
+			SIGNAL value = (SIGNAL) condition.get("signal");
 			node.setSensor(sensor);
 			node.setValue(value);
 			return node;
 		} else {
 			NodeTree nodeTree = new NodeTree();
-			nodeTree.setOperator(OPERATOR.valueOf((String) conditions.get(0).get("operator")));
+			nodeTree.setOperator(OPERATOR.valueOf((String) conditions.get(1).get("operator")));
 
 			Node left = new Node();
-			Map<String, Object> leftCondition = conditions.get(1);
-			String leftSensorName = (String) leftCondition.get("sensor");
+			Map<String, Object> leftCondition = conditions.get(0);
+			String leftSensorName = ((Sensor) leftCondition.get("sensor")).getName();
 			Sensor leftSensor = (Sensor) this.binding.getVariable(leftSensorName);
-			SIGNAL leftValue = (SIGNAL) leftCondition.get("value");
+			SIGNAL leftValue = (SIGNAL) leftCondition.get("signal");
 			left.setSensor(leftSensor);
 			left.setValue(leftValue);
 
 			Node right = new Node();
-			Map<String, Object> rightCondition = conditions.get(2);
-			String rightSensorName = (String) rightCondition.get("sensor");
+			Map<String, Object> rightCondition = conditions.get(1);
+			String rightSensorName = ((Sensor) rightCondition.get("sensor")).getName();
 			Sensor rightSensor = (Sensor) this.binding.getVariable(rightSensorName);
-			SIGNAL rightValue = (SIGNAL) rightCondition.get("value");
+			SIGNAL rightValue = (SIGNAL) rightCondition.get("signal");
 			right.setSensor(rightSensor);
 			right.setValue(rightValue);
 

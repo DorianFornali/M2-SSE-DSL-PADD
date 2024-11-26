@@ -8,7 +8,7 @@ state "unpressed" means "led" becomes "low" and "buzzer" becomes "low"
 
 initial "unpressed"
 
-from2 "pressed" to "unpressed" when "button" becomes "high" and "button2" becomes "high" done "OK"
-from2 "unpressed" to "pressed" when "button" becomes "low" done "OK"
+from "pressed" to "unpressed" when "button" becomes "high" and "button2" becomes "high" done "OK"
+from "unpressed" to "pressed" when "button" becomes "low" done "OK"
 
 export "Simple Alarm"
