@@ -19,27 +19,71 @@
 	    <version>1.0</version>
       </dependency>
     </dependencies>
-    
+
     <build>
-      <plugins>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <version>3.6.1</version>
-              <configuration>
-                  <source>1.8</source>
-                  <target>1.8</target>
-              </configuration>
-          </plugin>
-          <plugin>
-              <groupId>org.codehaus.mojo</groupId>
-              <artifactId>exec-maven-plugin</artifactId>
-              <version>1.6.0</version>
-              <configuration>
-                  <mainClass>VerySimpleAlarm</mainClass>
-              </configuration>
-          </plugin>
-      </plugins>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.6.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <id>run-very-simple-alarm</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>VerySimpleAlarm</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>run-fire-detection</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>FireDetection</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>run-dual-check-alarm</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>DualCheckAlarm</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>run-state-based-alarm</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>StateBasedAlarm</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>run-multi-state-alarm</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>MultiStateAlarm</mainClass>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 
 </project>

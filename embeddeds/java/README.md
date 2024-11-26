@@ -11,7 +11,40 @@ To run the code, considering the kernel available in the local maven repository:
 
 ```
 azrael:java mosser$ mvn -q clean package
-azrael:java mosser$ mvn -q exec:java
+```
+
+# EXECUTE THE BASIC SCENARIOS (AND ACCEPTANCE SCENARIO) INGENIERE MODELE 2024-2025
+
+## Basic scenarios
+
+### Very simple alarm
+
+```shell
+mvn exec:java@run-very-simple-alarm
+```
+
+### Dual-check alarm
+
+```shell
+mvn exec:java@run-dual-check-alarm
+```
+
+### State-based alarm
+
+```shell
+mvn exec:java@run-state-based-alarm
+```
+
+### Multi state alarm
+
+```shell
+mvn exec:java@run-multi-state-alarm
+```
+
+## Acceptance scenario - Handle analogic bricks
+
+```shell
+mvn exec:java@run-fire-detection
 ```
 
 ## Building a Fluent API
