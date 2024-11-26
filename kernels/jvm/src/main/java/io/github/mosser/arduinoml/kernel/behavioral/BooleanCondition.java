@@ -7,7 +7,7 @@ import io.github.mosser.arduinoml.kernel.generator.Visitor;
 import io.github.mosser.arduinoml.kernel.structural.OPERATOR;
 import io.github.mosser.arduinoml.kernel.structural.Sensor;
 
-public class NodeTree extends ConditionTree {
+public class BooleanCondition extends ConditionTree {
 
     private ConditionTree leftTree;
     private ConditionTree rightTree;
