@@ -2,6 +2,11 @@ package io.github.mosser.arduinoml.embedded.java.dsl;
 
 public class _ConditionTreeBuilder {
     TransitionBuilder parent;
+    static int nGeneratedConstants = 0;
+    /** Returns the name for an automatically generated constant (variable) */
+    static String getNewNameForConstant(){
+        return "AUTO_CONSTANT_" + nGeneratedConstants++;
+    }
 
     private String currentCondition = "";
 
@@ -74,7 +79,6 @@ public class _ConditionTreeBuilder {
         _NodeTreeBuilder nodeTreeBuilder = new _NodeTreeBuilder(parent, currentCondition);
         nodeTreeBuilder.parseConditionString();
         parent.local.setCondition(nodeTreeBuilder.local);
-        System.out.println("Final condition tree: " + nodeTreeBuilder.local.toPrettyString());
         return parent;
     }
 

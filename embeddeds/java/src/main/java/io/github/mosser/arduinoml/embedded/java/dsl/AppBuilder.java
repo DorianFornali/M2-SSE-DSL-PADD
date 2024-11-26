@@ -5,6 +5,7 @@ import io.github.mosser.arduinoml.kernel.App;
 import io.github.mosser.arduinoml.kernel.behavioral.State;
 import io.github.mosser.arduinoml.kernel.structural.Actuator;
 import io.github.mosser.arduinoml.kernel.structural.Brick;
+import io.github.mosser.arduinoml.kernel.structural.Constant;
 import io.github.mosser.arduinoml.kernel.structural.Sensor;
 
 import java.util.Map;
@@ -24,6 +25,7 @@ public class AppBuilder {
         AppBuilder inst = new AppBuilder();
         inst.theApp = new App();
         inst.theApp.setName(name);
+        inst.theApp.setConstants(new java.util.ArrayList<>());
         return inst;
     }
 
@@ -58,6 +60,15 @@ public class AppBuilder {
         }
     }
 
+    /************************
+     ** Declaring Constants **
+     ************************/
+
+    public AppBuilder addConstant(String name, float value) {
+        this.theApp.getConstants().add(new Constant(name, value));
+        return this;
+    }
+
 
     /**********************
      ** Declaring States **
@@ -80,7 +91,10 @@ public class AppBuilder {
                         .map( b -> (Sensor) b)
                         .collect(Collectors.toMap(Brick::getName, Function.identity()));
 
-        return new TransitionTableBuilder(this, stateTable, sensorTable);
+        Map<String, Constant> constantTable =
+                theApp.getConstants().stream().collect(Collectors.toMap(Constant::getName, Function.identity()));
+
+        return new TransitionTableBuilder(this, stateTable, sensorTable, constantTable);
     }
 
 

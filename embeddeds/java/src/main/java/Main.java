@@ -13,6 +13,7 @@ public class Main {
 
         App myApp =
                 application("red_button")
+                        .addConstant("var1", 40)
                         .uses(sensor("button", 9))
                         .uses(actuator("led", 12))
                         .uses(actuator("chauffage", 8))
@@ -34,7 +35,7 @@ public class Main {
                         .closeParenthesis()
                         .or()
                         .openParenthesis()
-                        .sensor("button").equals("LOW")
+                        .sensor("thermometre").greaterOrEquals("98")
                         .and().sensor("button").equals("HIGH")
                         .closeParenthesis()
                         .endWhen()

@@ -20,8 +20,6 @@ public class _NodeTreeBuilder {
     }
 
     public void parseConditionString() {
-        System.out.println("Parsing condition string: " + subTree);
-
         // The goal of this function is to recursively create the ConditionTree
         // We will first seek for the most atomic and/or operator
         // The "highest level" is the one that is the least nested in parenthesis
@@ -55,22 +53,12 @@ public class _NodeTreeBuilder {
 
         // Check if no operator was found
         if (highestLevelOperatorIndex == -1) {
-            // Create a simple node
-            /*Node simpleNode = new Node();
-            simpleNode.setSensor(parent.parent.findSensor(tokens[0]));
-            SIGNAL value = tokens[2].equals("HIGH") ? SIGNAL.HIGH : SIGNAL.LOW;
-            simpleNode.setValue(value);
-            local = simpleNode;*/
-            //System.out.println("Simple node created with condition: " + subTree.trim());
 
             if(tokens[2].equals("HIGH") || tokens[2].equals("LOW")){
                 // Meaning we are on a digital condition
-                System.out.println("Starting digital analysis");
                 DigitalCondition node = new DigitalCondition();
                 node.setSensor(parent.parent.findSensor(tokens[0]));
                 node.setValue(tokens[2].equals("HIGH") ? SIGNAL.HIGH : SIGNAL.LOW);
-
-                System.out.println("Analysing digital condition: " + node.toPrettyString());
 
                 local = node;
                 if(!tokens[1].equals("==")) {
@@ -83,23 +71,43 @@ public class _NodeTreeBuilder {
 
             else
             {
-                System.out.println("Starting analog analysis");
-                // We are in an analog condition, we will first convert the value to the float
-                float value = Float.parseFloat(tokens[2]);
+                // We are in an analog condition
+                // Two possible cases, the value either is the name of a constant
+                // Or a direct float value
+                boolean isConstant = parent.parent.isConstant(tokens[2]);
+                Constant value;
+
+                if(isConstant){
+                    value = parent.parent.findConstant(tokens[2]);
+                }
+                else {
+                    // The user directly input a float value
+                    // We first check if the entered value isnt already present in on of the constants
+                    // If yes, we reuse it, if not we create a new one
+
+                    // Is it actually a float ?
+                    try {
+                        Float.parseFloat(tokens[2]);
+                    } catch (NumberFormatException e) {
+                        // Error from the dev, either he entered a wrong variable name or a non float value
+                        System.err.println("Error: Invalid value in analog condition, " + tokens[2] +
+                                " is not a float nor a known constant");
+                        System.exit(1);
+                    }
+
+                    Constant constantAlreadyPresent = parent.parent.valueAlreadyPresent(Float.parseFloat(tokens[2]));
+                    if(constantAlreadyPresent != null){
+                        value = constantAlreadyPresent;
+                    }
+                    else {
+                        value = new Constant(_ConditionTreeBuilder.getNewNameForConstant(), Float.parseFloat(tokens[2]));
+                        parent.parent.addConstant(value);
+                    }
+                }
 
                 AnalogCondition node = new AnalogCondition();
                 node.setSensor(parent.parent.findSensor(tokens[0]));
-
-                // We create dynamically the constant based on the float
-                // Meaning the user does not need to create the constant by hand at first
-                // We create it dynamically
-                Constant c = new Constant("constant", value);
-                //TODO! Currently constant is of no use, we could also get a string in para
-                // and we will fetch the constant from the appBuilder
-                // That implies creating a method in appbuilder so the user can add constants
-                node.setValue(c);
-                System.out.println("Analysing analog condition: " + node);
-
+                node.setValue(value);
 
                 // Now we identify the comparator
                 switch(tokens[1]){
@@ -127,7 +135,6 @@ public class _NodeTreeBuilder {
                         System.out.println("Error: Invalid comparator in analog condition");
                 }
                 local = node;
-                System.out.println("Successfully handled analog condition: " + node.toPrettyString());
             }
 
              return;
@@ -151,7 +158,6 @@ public class _NodeTreeBuilder {
         // Now we will create the left and right NodeTreeBuilders
         _NodeTreeBuilder leftNodeTreeBuilder = new _NodeTreeBuilder(parent, leftSubString);
         _NodeTreeBuilder rightNodeTreeBuilder = new _NodeTreeBuilder(parent, rightSubString);
-        System.out.println("Correctly instanciated left and right node tree builders");
 
         // Now we will create the local ConditionTree
         local = new BooleanCondition();
@@ -159,9 +165,7 @@ public class _NodeTreeBuilder {
 
         // We now delegate the parsing to the left and right NodeTreeBuilders
         leftNodeTreeBuilder.parseConditionString();
-        System.out.println("Left tree: " + leftNodeTreeBuilder.local.toPrettyString());
         rightNodeTreeBuilder.parseConditionString();
-        System.out.println("Right tree: " + rightNodeTreeBuilder.local.toPrettyString());
 
         ((BooleanCondition) local).setOperator(operator);
         ((BooleanCondition) local).setLeftTree(leftNodeTreeBuilder.local);
