@@ -29,5 +29,10 @@ public class AnalogCondition extends Condition {
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public String toPrettyString() {
+        return value.toString() + " " + comparator;
+    }
     
 }

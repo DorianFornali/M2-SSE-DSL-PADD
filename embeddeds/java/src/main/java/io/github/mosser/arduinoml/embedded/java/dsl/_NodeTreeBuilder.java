@@ -1,8 +1,11 @@
 package io.github.mosser.arduinoml.embedded.java.dsl;
 
+import io.github.mosser.arduinoml.kernel.behavioral.AnalogCondition;
+import io.github.mosser.arduinoml.kernel.behavioral.BooleanCondition;
 import io.github.mosser.arduinoml.kernel.behavioral.ConditionTree;
-import io.github.mosser.arduinoml.kernel.behavioral.Node;
-import io.github.mosser.arduinoml.kernel.behavioral.NodeTree;
+import io.github.mosser.arduinoml.kernel.behavioral.DigitalCondition;
+import io.github.mosser.arduinoml.kernel.structural.COMPARATOR;
+import io.github.mosser.arduinoml.kernel.structural.Constant;
 import io.github.mosser.arduinoml.kernel.structural.OPERATOR;
 import io.github.mosser.arduinoml.kernel.structural.SIGNAL;
 
@@ -53,13 +56,81 @@ public class _NodeTreeBuilder {
         // Check if no operator was found
         if (highestLevelOperatorIndex == -1) {
             // Create a simple node
-            Node simpleNode = new Node();
+            /*Node simpleNode = new Node();
             simpleNode.setSensor(parent.parent.findSensor(tokens[0]));
             SIGNAL value = tokens[2].equals("HIGH") ? SIGNAL.HIGH : SIGNAL.LOW;
             simpleNode.setValue(value);
-            local = simpleNode;
+            local = simpleNode;*/
             //System.out.println("Simple node created with condition: " + subTree.trim());
-            return;
+
+            if(tokens[2].equals("HIGH") || tokens[2].equals("LOW")){
+                // Meaning we are on a digital condition
+                System.out.println("Starting digital analysis");
+                DigitalCondition node = new DigitalCondition();
+                node.setSensor(parent.parent.findSensor(tokens[0]));
+                node.setValue(tokens[2].equals("HIGH") ? SIGNAL.HIGH : SIGNAL.LOW);
+
+                System.out.println("Analysing digital condition: " + node.toPrettyString());
+
+                local = node;
+                if(!tokens[1].equals("==")) {
+                    // Error from the dev, we should have == if we are in a digital condition
+                    //TODO! Throw a custom exception ?
+                    System.out.println("Error: Digital condition should have == as comparator");
+
+                }
+            }
+
+            else
+            {
+                System.out.println("Starting analog analysis");
+                // We are in an analog condition, we will first convert the value to the float
+                float value = Float.parseFloat(tokens[2]);
+
+                AnalogCondition node = new AnalogCondition();
+                node.setSensor(parent.parent.findSensor(tokens[0]));
+
+                // We create dynamically the constant based on the float
+                // Meaning the user does not need to create the constant by hand at first
+                // We create it dynamically
+                Constant c = new Constant("constant", value);
+                //TODO! Currently constant is of no use, we could also get a string in para
+                // and we will fetch the constant from the appBuilder
+                // That implies creating a method in appbuilder so the user can add constants
+                node.setValue(c);
+                System.out.println("Analysing analog condition: " + node);
+
+
+                // Now we identify the comparator
+                switch(tokens[1]){
+                    case "<":
+                        node.setComparator(COMPARATOR.LT);
+                        break;
+                    case "<=":
+                        node.setComparator(COMPARATOR.LEQ);
+                        break;
+                    case ">":
+                        node.setComparator(COMPARATOR.GT);
+                        break;
+                    case ">=":
+                        node.setComparator(COMPARATOR.GEQ);
+                        break;
+                    case "==":
+                        node.setComparator(COMPARATOR.EQ);
+                        break;
+                    case "!=":
+                        node.setComparator(COMPARATOR.NEQ);
+                        break;
+                    default:
+                        // Error from the dev, we should have a valid comparator
+                        //TODO! Throw a custom exception ?
+                        System.out.println("Error: Invalid comparator in analog condition");
+                }
+                local = node;
+                System.out.println("Successfully handled analog condition: " + node.toPrettyString());
+            }
+
+             return;
         }
 
         // Now we will build the left subString and the right subString
@@ -80,20 +151,21 @@ public class _NodeTreeBuilder {
         // Now we will create the left and right NodeTreeBuilders
         _NodeTreeBuilder leftNodeTreeBuilder = new _NodeTreeBuilder(parent, leftSubString);
         _NodeTreeBuilder rightNodeTreeBuilder = new _NodeTreeBuilder(parent, rightSubString);
+        System.out.println("Correctly instanciated left and right node tree builders");
 
         // Now we will create the local ConditionTree
-        local = new NodeTree();
+        local = new BooleanCondition();
         OPERATOR operator = tokens[highestLevelOperatorIndex].equals("&&") ? OPERATOR.AND : OPERATOR.OR;
 
         // We now delegate the parsing to the left and right NodeTreeBuilders
-        System.out.println("Current condition tree for " + this.hashCode() + " " + local.toPrettyString());
         leftNodeTreeBuilder.parseConditionString();
+        System.out.println("Left tree: " + leftNodeTreeBuilder.local.toPrettyString());
         rightNodeTreeBuilder.parseConditionString();
+        System.out.println("Right tree: " + rightNodeTreeBuilder.local.toPrettyString());
 
-        ((NodeTree) local).setOperator(operator);
-        ((NodeTree) local).setLeftTree(leftNodeTreeBuilder.local);
-        ((NodeTree) local).setRightTree(rightNodeTreeBuilder.local);
-        System.out.println("End of parsing for " + this.hashCode() + " " + local.toPrettyString());
+        ((BooleanCondition) local).setOperator(operator);
+        ((BooleanCondition) local).setLeftTree(leftNodeTreeBuilder.local);
+        ((BooleanCondition) local).setRightTree(rightNodeTreeBuilder.local);
     }
 
     private String removeOuterParentheses(String str) {

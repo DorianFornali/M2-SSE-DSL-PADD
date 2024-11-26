@@ -24,4 +24,6 @@ public abstract class Condition extends ConditionTree {
         return sensors;
     }
 
+    public abstract String toPrettyString();
+
 }

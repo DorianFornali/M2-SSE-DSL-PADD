@@ -1,7 +1,5 @@
 package io.github.mosser.arduinoml.embedded.java.dsl;
 
-import io.github.mosser.arduinoml.kernel.behavioral.NodeTree;
-
 public class _ConditionTreeBuilder {
     TransitionBuilder parent;
 
@@ -21,12 +19,37 @@ public class _ConditionTreeBuilder {
         return this;
     }
 
-    public _ConditionTreeBuilder equals(){
+    public _ConditionTreeBuilder equals(String val){
         currentCondition += " == ";
-        return this;
+        return this.value(val);
     }
 
-    public _ConditionTreeBuilder value(String value){
+    public _ConditionTreeBuilder differentFrom(String val){
+        currentCondition += " != ";
+        return this.value(val);
+    }
+
+    public _ConditionTreeBuilder greaterThan(String val){
+        currentCondition += " > ";
+        return this.value(val);
+    }
+
+    public _ConditionTreeBuilder greaterOrEquals(String val){
+        currentCondition += " >= ";
+        return this.value(val);
+    }
+
+    public _ConditionTreeBuilder lessThan(String val){
+        currentCondition += " < ";
+        return this.value(val);
+    }
+
+    public _ConditionTreeBuilder lessOrEquals(String val){
+        currentCondition += " <= ";
+        return this.value(val);
+    }
+
+    private _ConditionTreeBuilder value(String value){
         currentCondition += " " + value + " ";
         return this;
     }
@@ -51,7 +74,7 @@ public class _ConditionTreeBuilder {
         _NodeTreeBuilder nodeTreeBuilder = new _NodeTreeBuilder(parent, currentCondition);
         nodeTreeBuilder.parseConditionString();
         parent.local.setCondition(nodeTreeBuilder.local);
-        System.out.println("End condition: " + nodeTreeBuilder.local.toPrettyString());
+        System.out.println("Final condition tree: " + nodeTreeBuilder.local.toPrettyString());
         return parent;
     }
 

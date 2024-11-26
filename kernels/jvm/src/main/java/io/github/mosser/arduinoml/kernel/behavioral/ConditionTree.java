@@ -14,5 +14,4 @@ public abstract class ConditionTree implements Visitable {
 	public abstract void accept(Visitor visitor);
 
     public abstract String toPrettyString();
-
 }

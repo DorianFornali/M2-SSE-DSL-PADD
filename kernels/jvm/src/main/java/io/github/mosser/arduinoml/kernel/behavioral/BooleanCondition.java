@@ -53,19 +53,7 @@ public class BooleanCondition extends ConditionTree {
 
     @Override
     public String toPrettyString() {
-        String left = "";
-        if(leftTree != null) {
-            left = leftTree.toPrettyString();
-        }
-
-        String right = "";
-        if(rightTree != null) {
-            right = rightTree.toPrettyString();
-        }
-
-
-        return String.format("%s %s %s", left, operator, right);
-
+        return leftTree.toPrettyString() + " " + operator + " " + rightTree.toPrettyString();
     }
     
 }
