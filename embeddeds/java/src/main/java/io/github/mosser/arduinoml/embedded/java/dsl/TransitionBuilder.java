@@ -2,8 +2,6 @@ package io.github.mosser.arduinoml.embedded.java.dsl;
 
 
 import io.github.mosser.arduinoml.kernel.behavioral.SignalTransition;
-import io.github.mosser.arduinoml.kernel.behavioral.Transition;
-import io.github.mosser.arduinoml.kernel.structural.SIGNAL;
 
 public class TransitionBuilder {
 
@@ -12,7 +10,7 @@ public class TransitionBuilder {
 
     SignalTransition local;
 
-    private _ConditionTreeBuilder conditionTreeBuilder;
+    private ConditionTreeBuilder conditionTreeBuilder;
 
     TransitionBuilder(TransitionTableBuilder parent, String source) {
         this.parent = parent;
@@ -21,8 +19,8 @@ public class TransitionBuilder {
     }
 
 
-    public _ConditionTreeBuilder when() {
-        return new _ConditionTreeBuilder(this);
+    public ConditionTreeBuilder when() {
+        return new ConditionTreeBuilder(this);
     }
 
     public TransitionTableBuilder goTo(String state) {

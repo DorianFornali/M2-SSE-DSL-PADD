@@ -1,82 +1,87 @@
 package io.github.mosser.arduinoml.embedded.java.dsl;
 
-public class _ConditionTreeBuilder {
+public class ConditionTreeBuilder {
     TransitionBuilder parent;
     static int nGeneratedConstants = 0;
+
+
     /** Returns the name for an automatically generated constant (variable) */
     static String getNewNameForConstant(){
         return "AUTO_CONSTANT_" + nGeneratedConstants++;
     }
 
+    /** A string representing the current condition being structured by the user
+     * This string will be parsed once the user is done to dynamically create the corresponding
+     * ConditionTree */
     private String currentCondition = "";
 
-    public _ConditionTreeBuilder(TransitionBuilder parent) {
+    public ConditionTreeBuilder(TransitionBuilder parent) {
         this.parent = parent;
     }
 
-    public _ConditionTreeBuilder sensor(String sensorName) {
+    public ConditionTreeBuilder sensor(String sensorName) {
         currentCondition += " " + sensorName + " ";
         return this;
     }
 
-    public _ConditionTreeBuilder openParenthesis(){
+    public ConditionTreeBuilder openParenthesis(){
         currentCondition += " ( ";
         return this;
     }
 
-    public _ConditionTreeBuilder equals(String val){
+    public ConditionTreeBuilder equals(String val){
         currentCondition += " == ";
         return this.value(val);
     }
 
-    public _ConditionTreeBuilder differentFrom(String val){
+    public ConditionTreeBuilder differentFrom(String val){
         currentCondition += " != ";
         return this.value(val);
     }
 
-    public _ConditionTreeBuilder greaterThan(String val){
+    public ConditionTreeBuilder greaterThan(String val){
         currentCondition += " > ";
         return this.value(val);
     }
 
-    public _ConditionTreeBuilder greaterOrEquals(String val){
+    public ConditionTreeBuilder greaterOrEquals(String val){
         currentCondition += " >= ";
         return this.value(val);
     }
 
-    public _ConditionTreeBuilder lessThan(String val){
+    public ConditionTreeBuilder lessThan(String val){
         currentCondition += " < ";
         return this.value(val);
     }
 
-    public _ConditionTreeBuilder lessOrEquals(String val){
+    public ConditionTreeBuilder lessOrEquals(String val){
         currentCondition += " <= ";
         return this.value(val);
     }
 
-    private _ConditionTreeBuilder value(String value){
+    private ConditionTreeBuilder value(String value){
         currentCondition += " " + value + " ";
         return this;
     }
 
-    public _ConditionTreeBuilder closeParenthesis(){
+    public ConditionTreeBuilder closeParenthesis(){
         currentCondition += " ) ";
         return this;
     }
 
-    public _ConditionTreeBuilder and(){
+    public ConditionTreeBuilder and(){
         currentCondition += " && ";
         return this;
     }
 
-    public _ConditionTreeBuilder or(){
+    public ConditionTreeBuilder or(){
         currentCondition += " || ";
         return this;
     }
 
     /** Will trigger the condition tree creation based on all operations described before */
     public TransitionBuilder endWhen(){
-        _NodeTreeBuilder nodeTreeBuilder = new _NodeTreeBuilder(parent, currentCondition);
+        NodeTreeBuilder nodeTreeBuilder = new NodeTreeBuilder(parent, currentCondition);
         nodeTreeBuilder.parseConditionString();
         parent.local.setCondition(nodeTreeBuilder.local);
         return parent;
