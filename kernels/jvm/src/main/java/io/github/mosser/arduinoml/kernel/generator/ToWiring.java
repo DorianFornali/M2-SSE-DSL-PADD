@@ -41,6 +41,13 @@ public class ToWiring extends Visitor<StringBuffer> {
 			w("STATE currentState = " + app.getInitial().getName()+";\n");
 		}
 
+		if (app.getConstants().size() > 0)
+			w("\n// constants\n");
+
+		for (Constant constant : app.getConstants()) {
+			w("const float " + constant.getName() + " = " + constant.getValue() + ";\n");
+		}
+
 		for(Brick brick: app.getBricks()){
 			brick.accept(this);
 		}
@@ -189,7 +196,7 @@ public class ToWiring extends Visitor<StringBuffer> {
 
 		if(context.get("pass") == PASS.TWO) {
 			Constant constant = analogAction.getValue();
-			w(String.format("\t\t\tanalogWrite(%d,%f);\n",analogAction.getActuator().getPin(), constant.getValue()));
+			w(String.format("\t\t\tanalogWrite(%d,%s);\n",analogAction.getActuator().getPin(), constant.getName()));
 			return;
 		}
 	}
@@ -210,7 +217,7 @@ public class ToWiring extends Visitor<StringBuffer> {
 
 	@Override
 	public void visit(AnalogCondition analogCondition) {
-		w(String.format(" analogRead(%d) %s %f ", analogCondition.getSensor().getPin(), analogCondition.getComparator(), analogCondition.getValue().getValue()));
+		w(String.format(" analogRead(%d) %s %s ", analogCondition.getSensor().getPin(), analogCondition.getComparator(), analogCondition.getValue().getName()));
 	}
 
 }
