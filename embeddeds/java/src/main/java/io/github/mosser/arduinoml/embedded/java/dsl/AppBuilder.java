@@ -49,7 +49,7 @@ public class AppBuilder {
         try {
             Brick b = kind.newInstance();
             if(name.isEmpty() || !Character.isLowerCase(name.charAt(0)))
-                throw new IllegalArgumentException("Illegal brick name: ["+name+"]");
+                throw new IllegalArgumentException("Illegal brick name: ["+name+"], must be lowercased");
             b.setName(name);
             if(port < 1 || port > 12)
                 throw new IllegalArgumentException("Illegal brick port: ["+port+"]");
