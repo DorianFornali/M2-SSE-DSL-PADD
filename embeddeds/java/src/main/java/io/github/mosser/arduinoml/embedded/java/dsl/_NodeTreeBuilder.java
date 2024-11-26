@@ -61,11 +61,6 @@ public class _NodeTreeBuilder {
             //System.out.println("Simple node created with condition: " + subTree.trim());
             return;
         }
-/*
-
-        System.out.println("Tokens array: " + java.util.Arrays.toString(tokens));
-        System.out.println("Highest level operator: " + tokens[highestLevelOperatorIndex] + " and is at index " + highestLevelOperatorIndex);
-*/
 
         // Now we will build the left subString and the right subString
         String leftSubString = "";
@@ -78,8 +73,9 @@ public class _NodeTreeBuilder {
             rightSubString += tokens[i] + " ";
         }
 
-        /*System.out.println("Left subString: " + leftSubString);
-        System.out.println("Right subString: " + rightSubString);*/
+        // Remove outer parentheses from the left and right substrings
+        leftSubString = removeOuterParentheses(leftSubString.trim());
+        rightSubString = removeOuterParentheses(rightSubString.trim());
 
         // Now we will create the left and right NodeTreeBuilders
         _NodeTreeBuilder leftNodeTreeBuilder = new _NodeTreeBuilder(parent, leftSubString);
@@ -98,6 +94,13 @@ public class _NodeTreeBuilder {
         ((NodeTree) local).setLeftTree(leftNodeTreeBuilder.local);
         ((NodeTree) local).setRightTree(rightNodeTreeBuilder.local);
         System.out.println("End of parsing for " + this.hashCode() + " " + local.toPrettyString());
+    }
+
+    private String removeOuterParentheses(String str) {
+        while (str.startsWith("(") && str.endsWith(")")) {
+            str = str.substring(1, str.length() - 1).trim();
+        }
+        return str;
     }
 
 }
