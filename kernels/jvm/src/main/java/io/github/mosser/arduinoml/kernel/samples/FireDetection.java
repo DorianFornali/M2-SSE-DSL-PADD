@@ -76,6 +76,7 @@ public class FireDetection {
         theAlarm.setBricks(Arrays.asList(temperature, led));
         theAlarm.setStates(Arrays.asList(fireDetected, noFireDetected));
         theAlarm.setInitial(noFireDetected);
+        theAlarm.setConstants(Arrays.asList(threshold));
 
         // Generating Code
         Visitor codeGenerator = new ToWiring();
