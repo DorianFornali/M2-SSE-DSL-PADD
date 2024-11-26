@@ -113,11 +113,11 @@ public class ModelBuilder extends ArduinomlBaseListener {
     public void enterTransition(ArduinomlParser.TransitionContext ctx) {
         Binding toBeResolvedLater = new Binding();
         toBeResolvedLater.to = ctx.next.getText();
-        toBeResolvedLater.condition = parseSimpleCondition(ctx.conditionTree());
+        toBeResolvedLater.condition = parseCondition(ctx.conditionTree());
         bindings.put(currentState.getName(), toBeResolvedLater);
     }
 
-    private ConditionTree parseSimpleCondition(ArduinomlParser.ConditionTreeContext ctx) {
+    private ConditionTree parseCondition(ArduinomlParser.ConditionTreeContext ctx) {
         if (ctx.OPERATOR() == null) {
             Node node = new Node();
             node.setSensor(sensors.get(ctx.condition(0).trigger.getText()));

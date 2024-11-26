@@ -1,4 +1,4 @@
-package main.groovy.groovuinoml.dsl
+package groovuinoml.dsl
 
 import io.github.mosser.arduinoml.kernel.behavioral.TimeUnit
 import io.github.mosser.arduinoml.kernel.behavioral.Action
@@ -45,28 +45,33 @@ abstract class GroovuinoMLBasescript extends Script {
 	def initial(state) {
 		((GroovuinoMLBinding) this.getBinding()).getGroovuinoMLModel().setInitialState(state instanceof String ? (State)((GroovuinoMLBinding)this.getBinding()).getVariable(state) : (State)state)
 	}
-	
-	// from state1 to state2 when sensor becomes signal
+
+	// from state1 to state2 when sensor becomes signal [and/or sensor becomes signal]*n done
 	def from(state1) {
-		[to: { state2 -> 
-			[when: { sensor ->
-				[becomes: { signal -> 
-					((GroovuinoMLBinding) this.getBinding()).getGroovuinoMLModel().createTransition(
-						state1 instanceof String ? (State)((GroovuinoMLBinding)this.getBinding()).getVariable(state1) : (State)state1, 
-						state2 instanceof String ? (State)((GroovuinoMLBinding)this.getBinding()).getVariable(state2) : (State)state2, 
-						sensor instanceof String ? (Sensor)((GroovuinoMLBinding)this.getBinding()).getVariable(sensor) : (Sensor)sensor, 
-						signal instanceof String ? (SIGNAL)((GroovuinoMLBinding)this.getBinding()).getVariable(signal) : (SIGNAL)signal)
+		[to: { state2 ->
+			def transitionBuilder = new TransitionBuilder(
+					state1 instanceof String ? (State)((GroovuinoMLBinding)this.getBinding()).getVariable(state1) : (State)state1,
+					state2 instanceof String ? (State)((GroovuinoMLBinding)this.getBinding()).getVariable(state2) : (State)state2
+			)
+			def closure
+			closure = { sensor, operator = null ->
+				[becomes: { signal ->
+					transitionBuilder.addCondition(
+							sensor instanceof String ? (Sensor)((GroovuinoMLBinding)this.getBinding()).getVariable(sensor) : (Sensor)sensor,
+							signal instanceof String ? (SIGNAL)((GroovuinoMLBinding)this.getBinding()).getVariable(signal) : (SIGNAL)signal,
+							operator
+					)
+					[and: { nextSensor -> closure(nextSensor, "AND") }, or: { nextSensor -> closure(nextSensor, "OR") },
+					 done: { val ->
+						 transitionBuilder.finalizeTransition(this.getBinding() as GroovuinoMLBinding)
+					 }]
 				}]
-			},
-			after: { delay ->
-				((GroovuinoMLBinding) this.getBinding()).getGroovuinoMLModel().createTransition(
-						state1 instanceof String ? (State)((GroovuinoMLBinding)this.getBinding()).getVariable(state1) : (State)state1,
-						state2 instanceof String ? (State)((GroovuinoMLBinding)this.getBinding()).getVariable(state2) : (State)state2,
-						delay)
-			}]
+			}
+
+			[when: { sensor -> closure(sensor)}]
 		}]
 	}
-	
+
 	// export name
 	def export(String name) {
 		println(((GroovuinoMLBinding) this.getBinding()).getGroovuinoMLModel().generateCode(name).toString())
@@ -82,5 +87,28 @@ abstract class GroovuinoMLBasescript extends Script {
 		} else {
 			println "Run method is disabled"
 		}
+	}
+}
+
+class TransitionBuilder {
+	State fromState
+	State toState
+	List<Map<String, Object>> conditions = []
+
+	TransitionBuilder(State fromState, State toState) {
+		this.fromState = fromState
+		this.toState = toState
+	}
+
+	void addCondition(Sensor sensor, SIGNAL signal, String operator) {
+		conditions.add([
+				sensor: sensor,
+				signal: signal,
+				operator: operator
+		])
+	}
+
+	void finalizeTransition(GroovuinoMLBinding binding) {
+		((GroovuinoMLBinding) binding).getGroovuinoMLModel().createTransition(fromState, toState, conditions)
 	}
 }

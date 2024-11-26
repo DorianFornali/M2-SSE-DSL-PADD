@@ -8,13 +8,13 @@ actuator led: 12
 on {
     led <= HIGH
     => off {
-        button is LOW
+        button is HIGH
     }
 }
 
 -> off {
     led <= LOW
     => on {
-        button is LOW
+        button is HIGH
     }
 }

@@ -8,14 +8,14 @@ actuator buzzer : 13
     led <= LOW
     buzzer <= LOW
     => buzzerOn {
-        button is LOW
+        button is HIGH
     }
 }
 
 buzzerOn {
     buzzer <= HIGH
     => ledOn {
-        button is LOW
+        button is HIGH
     }
 }
 
@@ -23,6 +23,6 @@ ledOn {
     led <= HIGH
     buzzer <= LOW
     => initial {
-        button is LOW
+        button is HIGH
     }
 }

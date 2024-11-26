@@ -1,4 +1,4 @@
-package main.groovy.groovuinoml.dsl;
+package groovuinoml.dsl;
 
 import java.util.*;
 
@@ -7,10 +7,7 @@ import io.github.mosser.arduinoml.kernel.App;
 import io.github.mosser.arduinoml.kernel.behavioral.*;
 import io.github.mosser.arduinoml.kernel.generator.ToWiring;
 import io.github.mosser.arduinoml.kernel.generator.Visitor;
-import io.github.mosser.arduinoml.kernel.structural.Actuator;
-import io.github.mosser.arduinoml.kernel.structural.Brick;
-import io.github.mosser.arduinoml.kernel.structural.SIGNAL;
-import io.github.mosser.arduinoml.kernel.structural.Sensor;
+import io.github.mosser.arduinoml.kernel.structural.*;
 
 public class GroovuinoMLModel {
 	private List<Brick> bricks;
@@ -49,22 +46,69 @@ public class GroovuinoMLModel {
 		this.states.add(state);
 		this.binding.setVariable(name, state);
 	}
-	
+
 	public void createTransition(State from, State to, Sensor sensor, SIGNAL value) {
 		SignalTransition transition = new SignalTransition();
 		transition.setNext(to);
-		transition.setSensor(sensor);
-		transition.setValue(value);
-		from.setTransition(transition);
-	}
-
-	public void createTransition(State from, State to, int delay) {
-		TimeTransition transition = new TimeTransition();
-		transition.setNext(to);
-		transition.setDelay(delay);
-		from.setTransition(transition);
+//		transition.setSensor(sensor);
+//		transition.setValue(value);
+//		from.setTransition(transition);
 	}
 	
+	public void createTransition(State from, State to, List<Map<String, Object>> conditions) {
+		SignalTransition transition = new SignalTransition();
+		transition.setNext(to);
+		transition.setCondition(parseCondition(conditions));
+		from.addTransition(transition);
+	}
+
+	private ConditionTree parseCondition(List<Map<String, Object>> conditions) {
+		if (conditions.size() == 1) {
+			Node node = new Node();
+			Map<String, Object> condition = conditions.get(0);
+			String sensorName = ((Sensor) condition.get("sensor")).getName();
+			Sensor sensor = (Sensor) this.binding.getVariable(sensorName);
+			SIGNAL value = (SIGNAL) condition.get("signal");
+			node.setSensor(sensor);
+			node.setValue(value);
+			return node;
+		} else {
+			NodeTree nodeTree = new NodeTree();
+			nodeTree.setOperator(OPERATOR.valueOf((String) conditions.get(1).get("operator")));
+
+			Node left = new Node();
+			Map<String, Object> leftCondition = conditions.get(0);
+			String leftSensorName = ((Sensor) leftCondition.get("sensor")).getName();
+			Sensor leftSensor = (Sensor) this.binding.getVariable(leftSensorName);
+			SIGNAL leftValue = (SIGNAL) leftCondition.get("signal");
+			left.setSensor(leftSensor);
+			left.setValue(leftValue);
+
+			Node right = new Node();
+			Map<String, Object> rightCondition = conditions.get(1);
+			String rightSensorName = ((Sensor) rightCondition.get("sensor")).getName();
+			Sensor rightSensor = (Sensor) this.binding.getVariable(rightSensorName);
+			SIGNAL rightValue = (SIGNAL) rightCondition.get("signal");
+			right.setSensor(rightSensor);
+			right.setValue(rightValue);
+
+			nodeTree.setLeftTree(left);
+			nodeTree.setRightTree(right);
+
+			return nodeTree;
+		}
+	}
+
+
+	// Implement this when we need Temporal transitions
+//	public void createTransition(State from, State to, int delay) {
+//		TimeTransition transition = new TimeTransition();
+//		transition.setNext(to);
+//		transition.setDelay(delay);
+//		from.setTransition(transition);
+//	}
+
+
 	public void setInitialState(State state) {
 		this.initialState = state;
 	}
