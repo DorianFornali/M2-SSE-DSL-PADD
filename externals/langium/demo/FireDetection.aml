@@ -1,0 +1,15 @@
+app FireDetection initial state idle {
+  bricks
+    Sensor temperature : 1
+    Actuator alarm : 11
+
+  states
+    idle {
+      alarm <= LOW
+      => alarming { temperature GT 50.7 }
+    }
+    alarming {
+      alarm <= HIGH
+      => idle { temperature LTE 50.7 }
+    }
+}

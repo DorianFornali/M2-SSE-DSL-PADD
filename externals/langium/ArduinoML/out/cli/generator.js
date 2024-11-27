@@ -102,17 +102,28 @@ function compileTransition(transition, fileNode) {
 }
 function compileConditionTree(conditionTree, fileNode, sensorName) {
     if (conditionTree.right === undefined) {
-        // Single condition with debounce
-        compileCondition(conditionTree.root, fileNode, "conditionMet", sensorName);
+        if ('operator' in conditionTree.root) {
+            compileDigitalCondition(conditionTree.root, fileNode, "conditionMet", sensorName);
+        }
+        else {
+            compileAnalogCondition(conditionTree.root, fileNode, "conditionMet", sensorName);
+        }
     }
     else {
-        // Two conditions with an operator and debounce
         const leftConditionVar = "leftCondition";
         const rightConditionVar = "rightCondition";
-        // Compile both conditions into their own variables
-        compileCondition(conditionTree.root, fileNode, leftConditionVar, sensorName);
-        compileCondition(conditionTree.right, fileNode, rightConditionVar, sensorName);
-        // Combine the conditions based on the operator
+        if ('operator' in conditionTree.root) {
+            compileDigitalCondition(conditionTree.root, fileNode, leftConditionVar, sensorName);
+        }
+        else {
+            compileAnalogCondition(conditionTree.root, fileNode, leftConditionVar, sensorName);
+        }
+        if ('operator' in conditionTree.right) {
+            compileDigitalCondition(conditionTree.right, fileNode, rightConditionVar, sensorName);
+        }
+        else {
+            compileAnalogCondition(conditionTree.right, fileNode, rightConditionVar, sensorName);
+        }
         const operatorCode = conditionTree.operator.value === "AND"
             ? `${leftConditionVar} && ${rightConditionVar}`
             : `${leftConditionVar} || ${rightConditionVar}`;
@@ -121,7 +132,7 @@ function compileConditionTree(conditionTree, fileNode, sensorName) {
             `);
     }
 }
-function compileCondition(condition, fileNode, resultVar, sensorName) {
+function compileDigitalCondition(condition, fileNode, resultVar, sensorName) {
     var _a;
     const sensorPin = (_a = condition.trigger.ref) === null || _a === void 0 ? void 0 : _a.inputPin;
     const signalValue = condition.value.value;
@@ -134,5 +145,38 @@ function compileCondition(condition, fileNode, resultVar, sensorName) {
                 bounceGuard = true;
             }
         `);
+}
+function compileAnalogCondition(condition, fileNode, resultVar, sensorName) {
+    var _a;
+    const sensorPin = (_a = condition.trigger.ref) === null || _a === void 0 ? void 0 : _a.inputPin;
+    const signalValue = condition.value;
+    const comparator = resolveComparator(condition.comparator.value);
+    fileNode.append(`
+            bool ${resultVar} = (analogRead(${sensorPin}) ${comparator} ${signalValue});
+    
+            bool ${sensorName}BounceGuard = millis() - ${sensorName}LastDebounceTime > debounce;
+            if (${resultVar} && ${sensorName}BounceGuard) {
+                ${sensorName}LastDebounceTime = millis();
+                bounceGuard = true;
+            }
+        `);
+}
+function resolveComparator(comparator) {
+    switch (comparator) {
+        case 'LT':
+            return '<';
+        case 'LTE':
+            return '<=';
+        case 'GT':
+            return '>';
+        case 'GTE':
+            return '>=';
+        case 'EQ':
+            return '==';
+        case 'NEQ':
+            return '!=';
+        default:
+            throw new Error('Unknown comparator: ' + comparator);
+    }
 }
 //# sourceMappingURL=generator.js.map

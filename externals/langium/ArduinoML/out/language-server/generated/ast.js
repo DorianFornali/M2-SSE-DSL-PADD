@@ -4,7 +4,7 @@
  * DO NOT EDIT MANUALLY!
  ******************************************************************************/
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reflection = exports.ArduinoMlAstReflection = exports.isTransition = exports.Transition = exports.isState = exports.State = exports.isSignal = exports.Signal = exports.isSensor = exports.Sensor = exports.isOperator = exports.Operator = exports.isConditionTree = exports.ConditionTree = exports.isCondition = exports.Condition = exports.isApp = exports.App = exports.isActuator = exports.Actuator = exports.isAction = exports.Action = exports.isBrick = exports.Brick = void 0;
+exports.reflection = exports.ArduinoMlAstReflection = exports.isTransition = exports.Transition = exports.isState = exports.State = exports.isSignal = exports.Signal = exports.isSensor = exports.Sensor = exports.isOperator = exports.Operator = exports.isDigitalCondition = exports.DigitalCondition = exports.isConditionTree = exports.ConditionTree = exports.isComparator = exports.Comparator = exports.isApp = exports.App = exports.isAnalogCondition = exports.AnalogCondition = exports.isActuator = exports.Actuator = exports.isAction = exports.Action = exports.isBrick = exports.Brick = void 0;
 /* eslint-disable */
 const langium_1 = require("langium");
 exports.Brick = 'Brick';
@@ -22,21 +22,31 @@ function isActuator(item) {
     return exports.reflection.isInstance(item, exports.Actuator);
 }
 exports.isActuator = isActuator;
+exports.AnalogCondition = 'AnalogCondition';
+function isAnalogCondition(item) {
+    return exports.reflection.isInstance(item, exports.AnalogCondition);
+}
+exports.isAnalogCondition = isAnalogCondition;
 exports.App = 'App';
 function isApp(item) {
     return exports.reflection.isInstance(item, exports.App);
 }
 exports.isApp = isApp;
-exports.Condition = 'Condition';
-function isCondition(item) {
-    return exports.reflection.isInstance(item, exports.Condition);
+exports.Comparator = 'Comparator';
+function isComparator(item) {
+    return exports.reflection.isInstance(item, exports.Comparator);
 }
-exports.isCondition = isCondition;
+exports.isComparator = isComparator;
 exports.ConditionTree = 'ConditionTree';
 function isConditionTree(item) {
     return exports.reflection.isInstance(item, exports.ConditionTree);
 }
 exports.isConditionTree = isConditionTree;
+exports.DigitalCondition = 'DigitalCondition';
+function isDigitalCondition(item) {
+    return exports.reflection.isInstance(item, exports.DigitalCondition);
+}
+exports.isDigitalCondition = isDigitalCondition;
 exports.Operator = 'Operator';
 function isOperator(item) {
     return exports.reflection.isInstance(item, exports.Operator);
@@ -64,7 +74,7 @@ function isTransition(item) {
 exports.isTransition = isTransition;
 class ArduinoMlAstReflection extends langium_1.AbstractAstReflection {
     getAllTypes() {
-        return ['Action', 'Actuator', 'App', 'Brick', 'Condition', 'ConditionTree', 'Operator', 'Sensor', 'Signal', 'State', 'Transition'];
+        return ['Action', 'Actuator', 'AnalogCondition', 'App', 'Brick', 'Comparator', 'ConditionTree', 'DigitalCondition', 'Operator', 'Sensor', 'Signal', 'State', 'Transition'];
     }
     computeIsSubtype(subtype, supertype) {
         switch (subtype) {
@@ -83,12 +93,13 @@ class ArduinoMlAstReflection extends langium_1.AbstractAstReflection {
             case 'Action:actuator': {
                 return exports.Actuator;
             }
+            case 'AnalogCondition:trigger':
+            case 'DigitalCondition:trigger': {
+                return exports.Sensor;
+            }
             case 'App:initial':
             case 'Transition:next': {
                 return exports.State;
-            }
-            case 'Condition:trigger': {
-                return exports.Sensor;
             }
             default: {
                 throw new Error(`${referenceId} is not a valid reference id.`);

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { CompositeGeneratorNode, NL, toString } from 'langium';
 import path from 'path';
-import { Action, Actuator, App, Condition, ConditionTree, Sensor, State, Transition } from '../language-server/generated/ast';
+import { Action, Actuator, AnalogCondition, App, ConditionTree, DigitalCondition, Sensor, State, Transition } from '../language-server/generated/ast';
 import { extractDestinationAndName } from './cli-util';
 
 export function generateInoFile(app: App, filePath: string, destination: string | undefined): string {
@@ -116,18 +116,27 @@ long `+brick.name+`LastDebounceTime = 0;
     
     function compileConditionTree(conditionTree: ConditionTree, fileNode: CompositeGeneratorNode, sensorName?: string) {
         if (conditionTree.right === undefined) {
-            // Single condition with debounce
-            compileCondition(conditionTree.root, fileNode, "conditionMet", sensorName);
+            if ('operator' in conditionTree.root) {
+                compileDigitalCondition(conditionTree.root as DigitalCondition, fileNode, "conditionMet", sensorName);
+            } else {
+                compileAnalogCondition(conditionTree.root as AnalogCondition, fileNode, "conditionMet", sensorName);
+            }
         } else {
-            // Two conditions with an operator and debounce
             const leftConditionVar = "leftCondition";
             const rightConditionVar = "rightCondition";
     
-            // Compile both conditions into their own variables
-            compileCondition(conditionTree.root, fileNode, leftConditionVar, sensorName);
-            compileCondition(conditionTree.right, fileNode, rightConditionVar, sensorName);
+            if ('operator' in conditionTree.root) {
+                compileDigitalCondition(conditionTree.root as DigitalCondition, fileNode, leftConditionVar, sensorName);
+            } else {
+                compileAnalogCondition(conditionTree.root as AnalogCondition, fileNode, leftConditionVar, sensorName);
+            }
+
+            if ('operator' in conditionTree.right) {
+                compileDigitalCondition(conditionTree.right as DigitalCondition, fileNode, rightConditionVar, sensorName);
+            } else {
+                compileAnalogCondition(conditionTree.right as AnalogCondition, fileNode, rightConditionVar, sensorName);
+            }
     
-            // Combine the conditions based on the operator
             const operatorCode =
                 conditionTree.operator!.value === "AND"
                     ? `${leftConditionVar} && ${rightConditionVar}`
@@ -138,7 +147,7 @@ long `+brick.name+`LastDebounceTime = 0;
         }
     }
     
-    function compileCondition(condition: Condition, fileNode: CompositeGeneratorNode, resultVar: string, sensorName?: string) {
+    function compileDigitalCondition(condition: DigitalCondition, fileNode: CompositeGeneratorNode, resultVar: string, sensorName?: string) {
         const sensorPin = condition.trigger.ref?.inputPin;
         const signalValue = condition.value.value;
     
@@ -152,5 +161,42 @@ long `+brick.name+`LastDebounceTime = 0;
             }
         `);
     }
+
+    function compileAnalogCondition(condition: AnalogCondition, fileNode: CompositeGeneratorNode, resultVar: string, sensorName?: string) {
+        const sensorPin = condition.trigger.ref?.inputPin;
+        const signalValue = condition.value;
+        const comparator = resolveComparator(condition.comparator.value);
+    
+        fileNode.append(`
+            bool ${resultVar} = (analogRead(${sensorPin}) ${comparator} ${signalValue});
+    
+            bool ${sensorName}BounceGuard = millis() - ${sensorName}LastDebounceTime > debounce;
+            if (${resultVar} && ${sensorName}BounceGuard) {
+                ${sensorName}LastDebounceTime = millis();
+                bounceGuard = true;
+            }
+        `);
+    }
+
+    function resolveComparator(comparator: string) {
+        switch (comparator) {
+            case 'LT':
+                return '<';
+            case 'LTE':
+                return '<=';
+            case 'GT':
+                return '>';
+            case 'GTE':
+                return '>=';
+            case 'EQ':
+                return '==';
+            case 'NEQ':
+                return '!=';
+            default:
+                throw new Error('Unknown comparator: ' + comparator);
+        }
+    }
+
+
     
 

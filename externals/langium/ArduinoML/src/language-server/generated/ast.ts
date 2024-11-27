@@ -40,6 +40,20 @@ export function isActuator(item: unknown): item is Actuator {
     return reflection.isInstance(item, Actuator);
 }
 
+export interface AnalogCondition extends AstNode {
+    readonly $container: ConditionTree;
+    readonly $type: 'AnalogCondition';
+    comparator: Comparator
+    trigger: Reference<Sensor>
+    value: number
+}
+
+export const AnalogCondition = 'AnalogCondition';
+
+export function isAnalogCondition(item: unknown): item is AnalogCondition {
+    return reflection.isInstance(item, AnalogCondition);
+}
+
 export interface App extends AstNode {
     readonly $type: 'App';
     bricks: Array<Brick>
@@ -54,31 +68,43 @@ export function isApp(item: unknown): item is App {
     return reflection.isInstance(item, App);
 }
 
-export interface Condition extends AstNode {
-    readonly $container: ConditionTree;
-    readonly $type: 'Condition';
-    trigger: Reference<Sensor>
-    value: Signal
+export interface Comparator extends AstNode {
+    readonly $container: AnalogCondition;
+    readonly $type: 'Comparator';
+    value: string
 }
 
-export const Condition = 'Condition';
+export const Comparator = 'Comparator';
 
-export function isCondition(item: unknown): item is Condition {
-    return reflection.isInstance(item, Condition);
+export function isComparator(item: unknown): item is Comparator {
+    return reflection.isInstance(item, Comparator);
 }
 
 export interface ConditionTree extends AstNode {
     readonly $container: Transition;
     readonly $type: 'ConditionTree';
     operator?: Operator
-    right?: Condition
-    root: Condition
+    right?: AnalogCondition | DigitalCondition
+    root: AnalogCondition | DigitalCondition
 }
 
 export const ConditionTree = 'ConditionTree';
 
 export function isConditionTree(item: unknown): item is ConditionTree {
     return reflection.isInstance(item, ConditionTree);
+}
+
+export interface DigitalCondition extends AstNode {
+    readonly $container: ConditionTree;
+    readonly $type: 'DigitalCondition';
+    trigger: Reference<Sensor>
+    value: Signal
+}
+
+export const DigitalCondition = 'DigitalCondition';
+
+export function isDigitalCondition(item: unknown): item is DigitalCondition {
+    return reflection.isInstance(item, DigitalCondition);
 }
 
 export interface Operator extends AstNode {
@@ -107,7 +133,7 @@ export function isSensor(item: unknown): item is Sensor {
 }
 
 export interface Signal extends AstNode {
-    readonly $container: Action | Condition;
+    readonly $container: Action | DigitalCondition;
     readonly $type: 'Signal';
     value: string
 }
@@ -148,10 +174,12 @@ export function isTransition(item: unknown): item is Transition {
 export interface ArduinoMlAstType {
     Action: Action
     Actuator: Actuator
+    AnalogCondition: AnalogCondition
     App: App
     Brick: Brick
-    Condition: Condition
+    Comparator: Comparator
     ConditionTree: ConditionTree
+    DigitalCondition: DigitalCondition
     Operator: Operator
     Sensor: Sensor
     Signal: Signal
@@ -162,7 +190,7 @@ export interface ArduinoMlAstType {
 export class ArduinoMlAstReflection extends AbstractAstReflection {
 
     getAllTypes(): string[] {
-        return ['Action', 'Actuator', 'App', 'Brick', 'Condition', 'ConditionTree', 'Operator', 'Sensor', 'Signal', 'State', 'Transition'];
+        return ['Action', 'Actuator', 'AnalogCondition', 'App', 'Brick', 'Comparator', 'ConditionTree', 'DigitalCondition', 'Operator', 'Sensor', 'Signal', 'State', 'Transition'];
     }
 
     protected override computeIsSubtype(subtype: string, supertype: string): boolean {
@@ -183,12 +211,13 @@ export class ArduinoMlAstReflection extends AbstractAstReflection {
             case 'Action:actuator': {
                 return Actuator;
             }
+            case 'AnalogCondition:trigger':
+            case 'DigitalCondition:trigger': {
+                return Sensor;
+            }
             case 'App:initial':
             case 'Transition:next': {
                 return State;
-            }
-            case 'Condition:trigger': {
-                return Sensor;
             }
             default: {
                 throw new Error(`${referenceId} is not a valid reference id.`);
