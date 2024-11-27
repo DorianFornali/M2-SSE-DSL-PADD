@@ -9,7 +9,7 @@ public class FireDetection {
 
         App myApp =
                 application("FireDetection")
-                        .uses(sensor("thermometre", 9))
+                        .uses(sensor("thermometre", 1))
                         .uses(actuator("alarm", 11)) // Corresponds in real life to a buzzer or a led for example
                         .hasForState("idle").initial()
                             .setting("alarm").toLow()
