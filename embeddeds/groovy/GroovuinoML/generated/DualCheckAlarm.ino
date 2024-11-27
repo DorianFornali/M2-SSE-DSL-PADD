@@ -1,3 +1,5 @@
+Transition finalized with result: OK
+Transition finalized with result: OK
 // Wiring code generated from an ArduinoML model
 // Application name: Dual Check Alarm
 

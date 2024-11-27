@@ -864,12 +864,12 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
     },
     {
       "$type": "TerminalRule",
-      "name": "LTE",
+      "name": "LEQ",
       "definition": {
         "$type": "CharacterRange",
         "left": {
           "$type": "Keyword",
-          "value": "LTE"
+          "value": "LEQ"
         }
       },
       "fragment": false,
@@ -890,12 +890,12 @@ const ArduinoMlGrammar = () => loadedArduinoMlGrammar !== null && loadedArduinoM
     },
     {
       "$type": "TerminalRule",
-      "name": "GTE",
+      "name": "GEQ",
       "definition": {
         "$type": "CharacterRange",
         "left": {
           "$type": "Keyword",
-          "value": "GTE"
+          "value": "GEQ"
         }
       },
       "fragment": false,

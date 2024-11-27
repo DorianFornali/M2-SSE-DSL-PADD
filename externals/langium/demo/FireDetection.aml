@@ -10,6 +10,6 @@ app FireDetection initial state idle {
     }
     alarming {
       alarm <= HIGH
-      => idle { temperature LTE 50.7 }
+      => idle { temperature LEQ 50.7 }
     }
 }

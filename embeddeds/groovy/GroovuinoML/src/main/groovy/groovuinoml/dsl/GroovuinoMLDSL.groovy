@@ -44,7 +44,7 @@ class GroovuinoMLDSL {
 			tokensWhitelist= []
 			//types allowed to be used  (including primitive types)
 			constantTypesClassesWhiteList= [
-				int, Integer, Number, Integer.TYPE, String, Object
+				int, Integer, Number, Integer.TYPE, String, Object, BigDecimal
 			]
 			//classes who are allowed to be receivers of method calls
 			receiversClassesWhiteList= [

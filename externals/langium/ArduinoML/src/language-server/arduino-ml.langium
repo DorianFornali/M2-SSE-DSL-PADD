@@ -57,12 +57,12 @@ terminal AND : 'AND';
 terminal OR : 'OR';
 
 Comparator:
-		value=(EQ | NEQ | LTE | LT | GTE | GT);
+		value=(EQ | NEQ | LEQ | LT | GEQ | GT);
 terminal EQ : 'EQ';
 terminal NEQ : 'NEQ';
-terminal LTE : 'LTE';
+terminal LEQ : 'LEQ';
 terminal LT : 'LT';
-terminal GTE : 'GTE';
+terminal GEQ : 'GEQ';
 terminal GT : 'GT';
 
 hidden terminal WS: /\s+/;

@@ -182,11 +182,11 @@ long `+brick.name+`LastDebounceTime = 0;
         switch (comparator) {
             case 'LT':
                 return '<';
-            case 'LTE':
+            case 'LEQ':
                 return '<=';
             case 'GT':
                 return '>';
-            case 'GTE':
+            case 'GEQ':
                 return '>=';
             case 'EQ':
                 return '==';

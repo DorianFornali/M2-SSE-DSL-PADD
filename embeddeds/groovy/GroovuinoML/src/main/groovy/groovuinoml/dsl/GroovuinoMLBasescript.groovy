@@ -1,5 +1,6 @@
 package groovuinoml.dsl
 
+import io.github.mosser.arduinoml.kernel.behavioral.DigitalAction
 import io.github.mosser.arduinoml.kernel.behavioral.TimeUnit
 import io.github.mosser.arduinoml.kernel.behavioral.Action
 import io.github.mosser.arduinoml.kernel.behavioral.State
@@ -31,7 +32,7 @@ abstract class GroovuinoMLBasescript extends Script {
 		def closure
 		closure = { actuator -> 
 			[becomes: { signal ->
-				Action action = new Action()
+				DigitalAction action = new DigitalAction()
 				action.setActuator(actuator instanceof String ? (Actuator)((GroovuinoMLBinding)this.getBinding()).getVariable(actuator) : (Actuator)actuator)
 				action.setValue(signal instanceof String ? (SIGNAL)((GroovuinoMLBinding)this.getBinding()).getVariable(signal) : (SIGNAL)signal)
 				actions.add(action)
@@ -53,24 +54,48 @@ abstract class GroovuinoMLBasescript extends Script {
 					state1 instanceof String ? (State)((GroovuinoMLBinding)this.getBinding()).getVariable(state1) : (State)state1,
 					state2 instanceof String ? (State)((GroovuinoMLBinding)this.getBinding()).getVariable(state2) : (State)state2
 			)
+
+			def addComparisonCondition = { sensor, value, operator ->
+				transitionBuilder.addCondition(
+						sensor instanceof String ? (Sensor)((GroovuinoMLBinding)this.getBinding()).getVariable(sensor) : (Sensor)sensor,
+						value,
+						null,
+						operator
+				)
+				[and: { nextSensor -> closure(nextSensor, "AND") }, or: { nextSensor -> closure(nextSensor, "OR") },
+				 done: { val ->
+					 transitionBuilder.finalizeTransition(this.getBinding() as GroovuinoMLBinding)
+					 println "Transition finalized with result: ${val}"
+				 }]
+			}
+
 			def closure
-			closure = { sensor, operator = null ->
+			closure = { sensor, logicalOperator = null ->
 				[becomes: { signal ->
 					transitionBuilder.addCondition(
 							sensor instanceof String ? (Sensor)((GroovuinoMLBinding)this.getBinding()).getVariable(sensor) : (Sensor)sensor,
 							signal instanceof String ? (SIGNAL)((GroovuinoMLBinding)this.getBinding()).getVariable(signal) : (SIGNAL)signal,
-							operator
+							logicalOperator,
+							null
 					)
 					[and: { nextSensor -> closure(nextSensor, "AND") }, or: { nextSensor -> closure(nextSensor, "OR") },
 					 done: { val ->
 						 transitionBuilder.finalizeTransition(this.getBinding() as GroovuinoMLBinding)
+						 println "Transition finalized with result: ${val}"
 					 }]
-				}]
+				},
+				 GT: { value -> addComparisonCondition(sensor, value, "GT") },
+				 LEQ: { value -> addComparisonCondition(sensor, value, "LEQ") },
+				 EQ: { value -> addComparisonCondition(sensor, value, "EQ") },
+				 NEQ: { value -> addComparisonCondition(sensor, value, "NEQ") },
+				 LT: { value -> addComparisonCondition(sensor, value, "LT") },
+				 GEQ: { value -> addComparisonCondition(sensor, value, "GEQ") }]
 			}
 
-			[when: { sensor -> closure(sensor)}]
+			[when: { sensor -> closure(sensor) }]
 		}]
 	}
+
 
 	// export name
 	def export(String name) {
@@ -100,11 +125,21 @@ class TransitionBuilder {
 		this.toState = toState
 	}
 
-	void addCondition(Sensor sensor, SIGNAL signal, String operator) {
+	void addCondition(Sensor sensor, SIGNAL signal, String operator, Optional<String> comparator) {
 		conditions.add([
 				sensor: sensor,
 				signal: signal,
-				operator: operator
+				operator: operator,
+				comparator: comparator
+		])
+	}
+
+	void addCondition(Sensor sensor, Number value, Optional<String> operator, String comparator) {
+		conditions.add([
+				sensor: sensor,
+				value: value,
+				operator: operator,
+				comparator: comparator
 		])
 	}
 
