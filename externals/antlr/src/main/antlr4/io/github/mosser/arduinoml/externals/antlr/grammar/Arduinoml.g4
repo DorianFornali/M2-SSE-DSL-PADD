@@ -23,8 +23,9 @@ states          :   state+;
  ** Conditions **
  *****************/
 
-conditionTree   :   condition (OPERATOR condition)?;
+conditionTree   :   (condition | analogCondition) (OPERATOR (condition | analogCondition))?;
 condition       :   trigger=IDENTIFIER 'is' value=SIGNAL;
+analogCondition :   trigger=IDENTIFIER COMPARATOR value=(INTEGER | FLOAT);
 
 /*****************
  ** Lexer rules **
@@ -34,6 +35,9 @@ PORT_NUMBER     :   [1-9] | '10' | '11' | '12' | '13';
 IDENTIFIER      :   LOWERCASE (LOWERCASE|UPPERCASE)+;
 SIGNAL          :   'HIGH' | 'LOW';
 OPERATOR        :   'AND' | 'OR';
+COMPARATOR      :   'EQ' | 'NEQ' | 'GT' | 'GEQ' | 'LT' | 'LEQ';
+INTEGER         :   [0-9]+;
+FLOAT           :   [0-9]+ '.' [0-9]+;
 
 /*************
  ** Helpers **

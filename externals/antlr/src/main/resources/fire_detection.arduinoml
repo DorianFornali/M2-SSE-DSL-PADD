@@ -1,0 +1,18 @@
+application fireDetection
+
+sensor temperature : 1
+actuator buzzer : 11
+
+-> initial {
+    buzzer <= LOW
+    => alarm {
+        temperature GT 50.7
+    }
+}
+
+alarm {
+    buzzer <= HIGH
+    => initial {
+        temperature LEQ 50.7
+    }
+}

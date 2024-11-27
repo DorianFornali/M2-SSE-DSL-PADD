@@ -5,13 +5,11 @@ import io.github.mosser.arduinoml.externals.antlr.grammar.*;
 
 import io.github.mosser.arduinoml.kernel.App;
 import io.github.mosser.arduinoml.kernel.behavioral.*;
-import io.github.mosser.arduinoml.kernel.structural.Actuator;
-import io.github.mosser.arduinoml.kernel.structural.SIGNAL;
-import io.github.mosser.arduinoml.kernel.structural.OPERATOR;
-import io.github.mosser.arduinoml.kernel.structural.Sensor;
+import io.github.mosser.arduinoml.kernel.structural.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class ModelBuilder extends ArduinomlBaseListener {
 
@@ -103,7 +101,7 @@ public class ModelBuilder extends ArduinomlBaseListener {
 
     @Override
     public void enterAction(ArduinomlParser.ActionContext ctx) {
-        Action action = new Action();
+        DigitalAction action = new DigitalAction();
         action.setActuator(actuators.get(ctx.receiver.getText()));
         action.setValue(SIGNAL.valueOf(ctx.value.getText()));
         currentState.getActions().add(action);
@@ -118,29 +116,57 @@ public class ModelBuilder extends ArduinomlBaseListener {
     }
 
     private ConditionTree parseCondition(ArduinomlParser.ConditionTreeContext ctx) {
-        if (ctx.OPERATOR() == null) {
-            Node node = new Node();
-            node.setSensor(sensors.get(ctx.condition(0).trigger.getText()));
-            node.setValue(SIGNAL.valueOf(ctx.condition(0).value.getText()));
-            return node;
+        if (ctx.OPERATOR() == null && ctx.condition(0) != null) {
+            return parseDigitalCondition(ctx.condition(0));
+        } else if (ctx.OPERATOR() == null && ctx.analogCondition(0) != null) {
+            return parseAnalogCondition(ctx.analogCondition(0));
         } else {
-            NodeTree nodeTree = new NodeTree();
-            nodeTree.setOperator(OPERATOR.valueOf(ctx.OPERATOR().getText()));
+            BooleanCondition booleanCondition = new BooleanCondition();
+            booleanCondition.setOperator(OPERATOR.valueOf(ctx.OPERATOR().getText()));
 
-            Node left = new Node();
-            left.setSensor(sensors.get(ctx.condition(0).trigger.getText()));
-            left.setValue(SIGNAL.valueOf(ctx.condition(0).value.getText()));
+            if (ctx.condition(0) != null) {
+                booleanCondition.setLeftTree(parseDigitalCondition(ctx.condition(0)));
+            } else {
+                booleanCondition.setLeftTree(parseAnalogCondition(ctx.analogCondition(0)));
+            }
 
-            Node right = new Node();
-            right.setSensor(sensors.get(ctx.condition(1).trigger.getText()));
-            right.setValue(SIGNAL.valueOf(ctx.condition(1).value.getText()));
+            if (ctx.condition(1) != null) {
+                booleanCondition.setRightTree(parseDigitalCondition(ctx.condition(1)));
+            } else {
+                booleanCondition.setRightTree(parseAnalogCondition(ctx.analogCondition(1)));
+            }
 
-            nodeTree.setLeftTree(left);
-            nodeTree.setRightTree(right);
-
-            return nodeTree;
+            return booleanCondition;
         }
     }
+
+    private AnalogCondition parseAnalogCondition(ArduinomlParser.AnalogConditionContext ctx) {
+        AnalogCondition condition = new AnalogCondition();
+        condition.setSensor(sensors.get(ctx.trigger.getText()));
+        Constant constant = null;
+        for (Constant c : theApp.getConstants()) {
+            if (c.getValue() == Double.parseDouble(ctx.value.getText())) {
+                constant = c;
+                break;
+            }
+        }
+        if (constant == null) {
+            Random rand = new Random();
+            constant = new Constant("AUTO_CONSTANT_" + rand.nextInt(1000), Double.parseDouble(ctx.value.getText()));
+            theApp.addConstant(constant);
+        }
+        condition.setValue(constant);
+        condition.setComparator(COMPARATOR.valueOf(ctx.COMPARATOR().getText()));
+        return condition;
+    }
+
+    private DigitalCondition parseDigitalCondition(ArduinomlParser.ConditionContext ctx) {
+        DigitalCondition condition = new DigitalCondition();
+        condition.setSensor(sensors.get(ctx.trigger.getText()));
+        condition.setValue(SIGNAL.valueOf(ctx.value.getText()));
+        return condition;
+    }
+
 
 
     @Override
