@@ -1,51 +1,75 @@
-__author__ = 'pascalpoizat'
-
+from typing import List
 from pyArduinoML.model.NamedElement import NamedElement
-import SIGNAL
+from pyArduinoML.model.Action import Action
+
 
 class State(NamedElement):
     """
-    A state in the application.
-
+    Represents a state in the ArduinoML behavioral model.
     """
 
-    def __init__(self, name, actions=(), transition=None):
+    def __init__(self, name: str = None):
         """
-        Constructor.
+        Constructor for State.
 
-        :param name: String, name of the state
-        :param actions: List[Action], sequence of actions to do when entering the state (size should be > 0)
-        :param transition: Transition, unique outgoing transition
-        :return:
+        :param name: str, the name of the state.
         """
-        NamedElement.__init__(self, name)
-        self.transition = transition
-        self.actions = actions
+        self._name = name
+        self._actions = []
+        self._transition = None
 
-    def settransition(self, transition):
+    @property
+    def name(self) -> str:
         """
-        Sets the transition of the state
-        :param transition: Transition
-        :return:
-        """
-        self.transition = transition
+        Getter for the name of the state.
 
-    def setup(self):
+        :return: str, the name of the state.
         """
-        Arduino code for the state.
+        return self._name
 
-        :return: String
+    @name.setter
+    def name(self, name: str):
         """
-        rtr = ""
-        rtr += "void state_%s() {\n" % self.name
-        # generate code for state actions
-        for action in self.actions:
-            rtr += "\tdigitalWrite(%s, %s);\n" % (action.brick.name, SIGNAL.value(action.value))
-            rtr += "\tboolean guard =  millis() - time > debounce;\n"
-        # generate code for the transition
-        transition = self.transition
-        rtr += "\tif (digitalRead(%s) == %s && guard) {\n\t\ttime = millis(); state_%s();\n\t} else {\n\t\tstate_%s();\n\t}" \
-               % (transition.sensor.name, SIGNAL.value(transition.value), transition.nextstate.name, self.name)
-        # end of state
-        rtr += "\n}\n"
-        return rtr
+        Setter for the name of the state.
+
+        :param name: str, the name to set.
+        """
+        self._name = name
+
+    @property
+    def actions(self) -> List[Action]:
+        """
+        Getter for the actions associated with the state.
+
+        :return: List[Action], the list of actions.
+        """
+        return self._actions
+
+    @actions.setter
+    def actions(self, actions: List[Action]):
+        """
+        Setter for the actions associated with the state.
+
+        :param actions: List[Action], the list of actions to set.
+        """
+        self._actions = actions
+
+    @property
+    def transition(self):
+        """
+        Getter for the transitions associated with the state.
+
+        :return: List[Transition], the list of transitions.
+        """
+        return self._transition
+
+    def set_transition(self, transition):
+        """
+        Adds a transition to the state.
+
+        :param transition: Transition, the transition to add.
+        """
+        self._transition = transition
+
+    def accept(self, visitor):
+        visitor.visit_state(self)

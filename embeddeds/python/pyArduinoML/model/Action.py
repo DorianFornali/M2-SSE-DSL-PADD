@@ -1,18 +1,36 @@
-__author__ = 'pascalpoizat'
+from abc import ABC, abstractmethod
+from pyArduinoML.model.Actuator import Actuator
 
-class Action :
+
+class Action(ABC):
     """
-    An action over a brick, sending a signal to it
-
+    Abstract base class for an action to be performed on an actuator.
     """
 
-    def __init__(self, value, brick):
+    def __init__(self, actuator: Actuator = None):
         """
-        Constructor.
+        Constructor for Action.
 
-        :param value: SIGNAL, the signal to send
-        :param brick: Brick, the brick concerned by the action
-        :return:
+        :param actuator: Actuator, the actuator associated with the action.
         """
-        self.value = value
-        self.brick = brick
+        self._actuator = actuator
+
+    @property
+    def actuator(self) -> Actuator:
+        """
+        Getter for the actuator.
+
+        :return: Actuator, the actuator associated with the action.
+        """
+        return self._actuator
+
+    @actuator.setter
+    def actuator(self, actuator: Actuator):
+        """
+        Setter for the actuator.
+
+        :param actuator: Actuator, the actuator associated with the action.
+        """
+        if not isinstance(actuator, Actuator):
+            raise TypeError("actuator must be an instance of Actuator")
+        self._actuator = actuator
