@@ -1,0 +1,17 @@
+application fireDetection {
+  // Declaring bricks
+  sensor button1 : 9;
+  sensor button1 : 10;
+  actuator buzzer  : 13;
+
+  // Declaring states
+  pressed {
+    buzzer <- HIGH;
+    button1 is LOW or button2 is LOW -> unpressed;
+  }
+
+  >> unpressed {
+    buzzer <- LOW;
+    button1 is HIGH and button2 is HIGH -> pressed;
+  }
+}

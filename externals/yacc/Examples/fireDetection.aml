@@ -1,0 +1,19 @@
+application fireDetection {
+  // Declaring bricks
+  sensor temperature : 9;
+  actuator led  : 12;
+
+  // Declaring constants
+  const treshold : 57.0;
+
+  // Declaring states
+  fireDetected {
+    led <- HIGH;
+    temperature <= treshold -> noFireDetected;
+  }
+
+  >> noFireDetected {
+    led <- LOW;
+    temperature > treshold -> fireDetected;
+  }
+}

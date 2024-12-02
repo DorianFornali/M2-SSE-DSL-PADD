@@ -11,12 +11,12 @@ application foo {
 
   // Declaring states
   on {
-    led <= HIGH;
-    button is HIGH => off;
+    led <- HIGH;
+    button is HIGH -> off;
   }
 
-  -> off {
-    led <= LOW;
-    button is HIGH => on;
+  >> off {
+    led <- LOW;
+    button is HIGH -> on;
   }
 }

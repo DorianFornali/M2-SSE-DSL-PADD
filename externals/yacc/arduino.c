@@ -66,6 +66,43 @@ Brick *add_brick(Brick *b, Brick *list) {
   return b;
 }
 
+// ======================================================================
+//                            C O N S T A N T S
+// ======================================================================
+struct arduino_constant {
+  char *var;
+  float value;
+  struct arduino_constant *next;
+};
+
+/// Find name in the list of already declared constants
+static int find_constant(char *name, Constant *list) {
+  for (Constant *p = list; p; p = p->next) {
+    if (strcmp(name, p->var) == 0) return 1;
+  }
+  return 0;
+}
+
+// Make a new constant named `name` with value `value`
+Constant *make_constant(char *name, float value) {
+  Constant *p = must_malloc(sizeof(Constant));
+
+  p->var   = name;
+  p->value = value;
+  p->next  = NULL;
+  return p;
+}
+
+// Add a constant to a list of constants
+Constant *add_constant(Constant *list, Constant *c) {
+  // Check that the given variable is not already used
+  if (find_brick(c->var, list)) {
+    error_msg(yylineno, "name '%s' was already used", c->var);
+  }
+  c->next = list;
+  return c;
+}
+
 
 // ======================================================================
 //                            T R A N S I T I O N
@@ -92,21 +129,47 @@ Transition *make_transition(char *var, int signal, char *newstate) {
 // ======================================================================
 //                            A C T I O N
 // ======================================================================
+
 struct arduino_action {
   int lineno;
   char *var_name;
-  int sig_value;
+  enum const_type type;
+  union value *value;
   struct arduino_action *next;
 };
 
-// Make a new action (setting `var` to `signal`)
-Action *make_action(char *var, int signal) {
+Action *make_signal_action(char *var, enum const_type type, int signal) {
+  union value *v = must_malloc(sizeof(*v));
+  v->signal_value = signal;
+  
+  Action *p = make_action(var, type, v);
+  return p;
+}
+
+Action *make_float_action(char *var, enum const_type type, float float_value) {
+  union value *v = must_malloc(sizeof(*v));
+  v->float_value = float_value;
+  
+  Action *p = make_action(var, type, v);
+  return p;
+}
+
+Action *make_var_action(char *var, enum const_type type, char *var_value) {
+  union value *v = must_malloc(sizeof(*v));
+  v->var_value = var_value;
+  
+  Action *p = make_action(var, type, v);
+  return p;
+}
+
+Action *make_action(char *var, enum const_type type, union value *value) {
   Action *p = must_malloc(sizeof(Action));
 
-  p->lineno    = yylineno;
-  p->var_name  = var;
-  p->sig_value = signal;
-  p->next      = NULL;
+  p->lineno         = yylineno;
+  p->var_name       = var;
+  p->type           = type;
+  p->value          = value;
+  p->next           = NULL;
   return p;
 }
 
@@ -165,6 +228,91 @@ State *add_state(State *list, State *s) {
     return list;
   }
   return s;
+}
+
+// ======================================================================
+//                          C O N D I T I O N S
+// ======================================================================
+
+struct arduino_condition_tree {
+  int is_condition;
+  union condition_tree_union *condition_tree_union;
+};
+
+struct arduino_condition {
+  char *var;
+  enum const_type type;
+  union value *value;
+  enum binary_op op;
+};
+
+struct arduino_boolean_condition {
+  enum binary_op op;
+  struct arduino_condition_tree *left;
+  struct arduino_condition_tree *right;
+};
+
+Condition *make_condition(char *var, enum const_type type, union value *value, enum binary_op op) {
+  Condition *p = must_malloc(sizeof(Condition));
+
+  p->var   = var;
+  p->type  = type;
+  p->value = value;
+  p->op    = op;
+  return p;
+}
+
+Condition *make_signal_condition(char *var, int signal, enum binary_op op) {
+  union value *v = must_malloc(sizeof(*v));
+  v->signal_value = signal;
+  
+  Condition *p = make_condition(var, signal, v, op);
+  return p;
+}
+
+Condition *make_float_condition(char *var, float float_value, enum binary_op op) {
+  union value *v = must_malloc(sizeof(*v));
+  v->float_value = float_value;
+  
+  Condition *p = make_condition(var, value, v, op);
+  return p;
+}
+
+Condition *make_var_condition(char *var, char *var_value, enum binary_op op) {
+  union value *v = must_malloc(sizeof(*v));
+  v->var_value = var_value;
+  
+  Condition *p = make_condition(var, var, v, op);
+  return p;
+}
+
+BooleanCondition *make_boolean_condition(enum binary_op op, struct arduino_condition_tree *left, struct arduino_condition_tree *right) {
+  BooleanCondition *p = must_malloc(sizeof(BooleanCondition));
+
+  p->op    = op;
+  p->left  = left;
+  p->right = right;
+  return p;
+}
+
+ConditionTree *make_condition_tree(Condition *condition) {
+  ConditionTree *p = must_malloc(sizeof(ConditionTree));
+  union condition_tree_union *ct = must_malloc(sizeof(union condition_tree_union));
+  ct->condition = condition;
+
+  p->is_condition = 1;
+  p->condition_tree_union = ct;
+  return p;
+}
+
+ConditionTree *make_boolean_condition_tree(BooleanCondition *boolean_condition) {
+  ConditionTree *p = must_malloc(sizeof(ConditionTree));
+  union condition_tree_union *ct = must_malloc(sizeof(union condition_tree_union));
+  ct->boolean_condition = boolean_condition;
+
+  p->is_condition = 0;
+  p->condition_tree_union = ct;
+  return p;
 }
 
 
@@ -300,4 +448,12 @@ static void *__must_malloc(size_t sz, const char *func, const char *file, int li
     exit(1);
   }
   return res;
+}
+
+// Create a new unique constant name
+static char *new_const_name(void) {
+  static int counter = 0;
+  char *name = must_malloc(10);
+  sprintf(name, "const_%d", counter++);
+  return name;
 }

@@ -1,3 +1,5 @@
+D                       [0-9]
+
 %{
    #include "arduino_syntax.h"
 
@@ -10,16 +12,27 @@
 "application"           return KAPPL;
 "sensor"                return KSENSOR;
 "actuator"              return KACTUATOR;
-"is"                    return KIS;
 "HIGH"                  return KHIGH;
 "LOW"                   return KLOW;
-"=>"                    return RIGHT;
-"<="                    return LEFT;
-"->"                    return INITSTATE;
+"is"                    return KIS;
+"const"                 return KCONST;
+"and"                   return KAND;
+"or"                    return KOR;
+"=="                    return KEQ;
+"!="                    return KNE;
+">="                    return KGEQ;
+"<="                    return KLEQ;
+">"                     return KGT;
+"<"                     return KLT;
+"->"                    return RIGHT;
+"<-"                    return LEFT;
+">>"                    return INITSTATE;
 
 
   /* ==== port numbers (as strings) and identifiers */
-[1-9]|(1[012])          { yylval.value = atoi(yytext); return PORT_NUMBER; }
+/* [1-9]|(1[012])          { yylval.value = atoi(yytext); return PORT_NUMBER; } */
+{D}+"."{D}+             { yylval.fval = atof(yytext); return FLOAT; }
+{D}+                    { yylval.ival = atoi(yytext); return INT; }
 [a-zA-Z][a-zA-Z0-9_]+   { yylval.name  = strdup(yytext); return IDENT; }
 
   /* ==== Spaces and comments ==== */
