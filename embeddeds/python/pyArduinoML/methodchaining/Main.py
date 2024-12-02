@@ -26,7 +26,7 @@ def red_button_application():
             .hasForState("off").initial().setting("led").toLow().endState()
             .beginTransitionTable()
                 .from_("on").when("button").isHigh().goTo("off")
-                .from_("off").when("button").isLow().goTo("on") 
+                .from_("off").when("button").isHigh().goTo("on") 
             .endTransitionTable()
         .build() 
     )
@@ -36,6 +36,12 @@ def red_button_application():
     generated_code = visitor.get_result() 
 
     print(generated_code)
+
+
+
+
+
+
 
 
 if __name__ == '__main__':

@@ -8,7 +8,6 @@ class ToWiring:
         self.context = {}
 
     def w(self, s):
-        
         self.result.append(s)
 
     def visit_app(self, app):

@@ -7,8 +7,6 @@ from pyArduinoML.model.Sensor import Sensor
 from pyArduinoML.methodchaining.StateBuilder import StateBuilder
 from pyArduinoML.methodchaining.TransitionTableBuilder import TransitionTableBuilder
 
-from pyArduinoML.methodchaining.BrickBuilder import ACTUATOR, SENSOR
-
 
 class AppBuilder:
     """
