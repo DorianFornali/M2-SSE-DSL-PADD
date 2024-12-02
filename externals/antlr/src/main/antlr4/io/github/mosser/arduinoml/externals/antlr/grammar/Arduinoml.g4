@@ -8,24 +8,27 @@ root            :   declaration bricks states EOF;
 
 declaration     :   'application' name=IDENTIFIER;
 
-bricks          :   (sensor | actuator)+;
-    sensor      :   'sensor' location;
-    actuator    :   'actuator' location;
-    location    :   id=IDENTIFIER ':' port=PORT_NUMBER;
+bricks          :   (analogSensor | digitalSensor | analogActuator | digitalActuator)+;
+    analogSensor      :   'analogSensor' location;
+    digitalSensor     :   'digitalSensor' location;
+    analogActuator    :   'analogActuator' location;
+    digitalActuator   :   'digitalActuator' location;
+    location          :   id=IDENTIFIER (':' port=PORT_NUMBER)?;
 
 states          :   state+;
-    state       :   initial? name=IDENTIFIER '{' (action | transition)* '}';
-    action      :   receiver=IDENTIFIER '<=' value=SIGNAL;
-    transition  :   '=>' next=IDENTIFIER '{' conditionTree '}';
-    initial     :   '->';
+    state              :   initial? name=IDENTIFIER '{' (digitalAction | analogAction | transition)* '}';
+    digitalAction      :   receiver=IDENTIFIER '<=' value=SIGNAL;
+    analogAction       :  receiver=IDENTIFIER '<=' value=(INTEGER | FLOAT);
+    transition         :   '=>' next=IDENTIFIER '{' conditionTree '}';
+    initial            :   '->';
 
 /*****************
  ** Conditions **
  *****************/
 
-conditionTree   :   (condition | analogCondition) (OPERATOR (condition | analogCondition))?;
-condition       :   trigger=IDENTIFIER 'is' value=SIGNAL;
-analogCondition :   trigger=IDENTIFIER COMPARATOR value=(INTEGER | FLOAT);
+conditionTree          :   (digitalCondition | analogCondition) (OPERATOR (digitalCondition | analogCondition))?;
+digitalCondition       :   trigger=IDENTIFIER 'is' value=SIGNAL;
+analogCondition        :   trigger=IDENTIFIER COMPARATOR value=(INTEGER | FLOAT);
 
 /*****************
  ** Lexer rules **

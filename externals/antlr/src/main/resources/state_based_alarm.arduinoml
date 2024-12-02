@@ -1,8 +1,8 @@
 application simpleAlarm
 
 # Declaring bricks
-sensor button: 9
-actuator led: 12
+digitalSensor button: 9
+digitalActuator led: 12
 
 # Declaring states
 on {

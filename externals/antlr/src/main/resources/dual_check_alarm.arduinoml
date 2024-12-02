@@ -1,8 +1,8 @@
 application dualCheckAlarm
 
-sensor buttonone : 9
-sensor buttontwo : 10
-actuator buzzer : 13
+digitalSensor buttonone : 9
+digitalSensor buttontwo : 10
+digitalActuator buzzer : 11
 
 -> unpressed {
     buzzer <= LOW

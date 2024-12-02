@@ -29,8 +29,12 @@ public class ModelBuilder extends ArduinomlBaseListener {
      ** Symbol tables **
      *******************/
 
-    private Map<String, Sensor>   sensors   = new HashMap<>();
-    private Map<String, Actuator> actuators = new HashMap<>();
+    private Map<String, DigitalSensor>   digitalSensors   = new HashMap<>();
+    private Map<String, AnalogSensor>   analogSensors    = new HashMap<>();
+
+    private Map<String, DigitalActuator> digitalActuators = new HashMap<>();
+    private Map<String, AnalogActuator>  analogActuators  = new HashMap<>();
+
     private Map<String, State>    states  = new HashMap<>();
     private Map<String, Binding>  bindings  = new HashMap<>();
 
@@ -68,21 +72,55 @@ public class ModelBuilder extends ArduinomlBaseListener {
     }
 
     @Override
-    public void enterSensor(ArduinomlParser.SensorContext ctx) {
-        Sensor sensor = new Sensor();
+    public void enterAnalogSensor(ArduinomlParser.AnalogSensorContext ctx) {
+        AnalogSensor sensor = null;
+        if (ctx.location().port != null) {
+            sensor = new AnalogSensor(Integer.parseInt(ctx.location().port.getText()));
+        } else {
+            sensor = new AnalogSensor();
+        }
         sensor.setName(ctx.location().id.getText());
-        sensor.setPin(Integer.parseInt(ctx.location().port.getText()));
         this.theApp.getBricks().add(sensor);
-        sensors.put(sensor.getName(), sensor);
+        analogSensors.put(sensor.getName(), sensor);
     }
 
     @Override
-    public void enterActuator(ArduinomlParser.ActuatorContext ctx) {
-        Actuator actuator = new Actuator();
+    public void enterDigitalSensor(ArduinomlParser.DigitalSensorContext ctx) {
+        DigitalSensor sensor = null;
+        if (ctx.location().port != null) {
+            sensor = new DigitalSensor(Integer.parseInt(ctx.location().port.getText()));
+        } else {
+            sensor = new DigitalSensor();
+        }
+        sensor.setName(ctx.location().id.getText());
+        this.theApp.getBricks().add(sensor);
+        digitalSensors.put(sensor.getName(), sensor);
+    }
+
+    @Override
+    public void enterAnalogActuator(ArduinomlParser.AnalogActuatorContext ctx) {
+        AnalogActuator actuator = null;
+        if (ctx.location().port != null) {
+            actuator = new AnalogActuator(Integer.parseInt(ctx.location().port.getText()));
+        } else {
+            actuator = new AnalogActuator();
+        }
         actuator.setName(ctx.location().id.getText());
-        actuator.setPin(Integer.parseInt(ctx.location().port.getText()));
         this.theApp.getBricks().add(actuator);
-        actuators.put(actuator.getName(), actuator);
+        analogActuators.put(actuator.getName(), actuator);
+    }
+
+    @Override
+    public void enterDigitalActuator(ArduinomlParser.DigitalActuatorContext ctx) {
+        DigitalActuator actuator = null;
+        if (ctx.location().port != null) {
+            actuator = new DigitalActuator(Integer.parseInt(ctx.location().port.getText()));
+        } else {
+            actuator = new DigitalActuator();
+        }
+        actuator.setName(ctx.location().id.getText());
+        this.theApp.getBricks().add(actuator);
+        digitalActuators.put(actuator.getName(), actuator);
     }
 
     @Override
@@ -100,9 +138,17 @@ public class ModelBuilder extends ArduinomlBaseListener {
     }
 
     @Override
-    public void enterAction(ArduinomlParser.ActionContext ctx) {
+    public void enterAnalogAction(ArduinomlParser.AnalogActionContext ctx) {
+        AnalogAction action = new AnalogAction();
+        action.setActuator(analogActuators.get(ctx.receiver.getText()));
+        action.setValue(getConstant(Double.parseDouble(ctx.value.getText())));
+        currentState.getActions().add(action);
+    }
+
+    @Override
+    public void enterDigitalAction(ArduinomlParser.DigitalActionContext ctx) {
         DigitalAction action = new DigitalAction();
-        action.setActuator(actuators.get(ctx.receiver.getText()));
+        action.setActuator(digitalActuators.get(ctx.receiver.getText()));
         action.setValue(SIGNAL.valueOf(ctx.value.getText()));
         currentState.getActions().add(action);
     }
@@ -116,22 +162,22 @@ public class ModelBuilder extends ArduinomlBaseListener {
     }
 
     private ConditionTree parseCondition(ArduinomlParser.ConditionTreeContext ctx) {
-        if (ctx.OPERATOR() == null && ctx.condition(0) != null) {
-            return parseDigitalCondition(ctx.condition(0));
+        if (ctx.OPERATOR() == null && ctx.digitalCondition(0) != null) {
+            return parseDigitalCondition(ctx.digitalCondition(0));
         } else if (ctx.OPERATOR() == null && ctx.analogCondition(0) != null) {
             return parseAnalogCondition(ctx.analogCondition(0));
         } else {
             BooleanCondition booleanCondition = new BooleanCondition();
             booleanCondition.setOperator(OPERATOR.valueOf(ctx.OPERATOR().getText()));
 
-            if (ctx.condition(0) != null) {
-                booleanCondition.setLeftTree(parseDigitalCondition(ctx.condition(0)));
+            if (ctx.digitalCondition(0) != null) {
+                booleanCondition.setLeftTree(parseDigitalCondition(ctx.digitalCondition(0)));
             } else {
                 booleanCondition.setLeftTree(parseAnalogCondition(ctx.analogCondition(0)));
             }
 
-            if (ctx.condition(1) != null) {
-                booleanCondition.setRightTree(parseDigitalCondition(ctx.condition(1)));
+            if (ctx.digitalCondition(1) != null) {
+                booleanCondition.setRightTree(parseDigitalCondition(ctx.digitalCondition(1)));
             } else {
                 booleanCondition.setRightTree(parseAnalogCondition(ctx.analogCondition(1)));
             }
@@ -142,7 +188,7 @@ public class ModelBuilder extends ArduinomlBaseListener {
 
     private AnalogCondition parseAnalogCondition(ArduinomlParser.AnalogConditionContext ctx) {
         AnalogCondition condition = new AnalogCondition();
-        condition.setSensor(sensors.get(ctx.trigger.getText()));
+        condition.setSensor(analogSensors.get(ctx.trigger.getText()));
         Constant constant = null;
         for (Constant c : theApp.getConstants()) {
             if (c.getValue() == Double.parseDouble(ctx.value.getText())) {
@@ -160,13 +206,28 @@ public class ModelBuilder extends ArduinomlBaseListener {
         return condition;
     }
 
-    private DigitalCondition parseDigitalCondition(ArduinomlParser.ConditionContext ctx) {
+    private DigitalCondition parseDigitalCondition(ArduinomlParser.DigitalConditionContext ctx) {
         DigitalCondition condition = new DigitalCondition();
-        condition.setSensor(sensors.get(ctx.trigger.getText()));
+        condition.setSensor(digitalSensors.get(ctx.trigger.getText()));
         condition.setValue(SIGNAL.valueOf(ctx.value.getText()));
         return condition;
     }
 
+    private Constant getConstant(Double value) {
+        Constant constant = null;
+        for (Constant c : theApp.getConstants()) {
+            if (c.getValue() == Double.parseDouble(value.toString())) {
+                constant = c;
+                break;
+            }
+        }
+        if (constant == null) {
+            Random rand = new Random();
+            constant = new Constant("AUTO_CONSTANT_" + rand.nextInt(1000), Double.parseDouble(value.toString()));
+            theApp.addConstant(constant);
+        }
+        return constant;
+    }
 
 
     @Override
