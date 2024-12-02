@@ -6,7 +6,7 @@ uses MethodChaining, nothing Python-specific
 """
 
 
-def demo1():
+def red_button_application():
     """
     Direct use of the DSL.
     + : auto-completion (limited due to python typing system)
@@ -15,45 +15,35 @@ def demo1():
     :return:
     """
     from pyArduinoML.methodchaining.AppBuilder import AppBuilder
-    from pyArduinoML.model.SIGNAL import HIGH, LOW
+    from pyArduinoML.generator.ToWiring import ToWiring
 
-    app = AppBuilder("Switch!") \
-        .sensor("BUTTON").on_pin(9) \
-        .actuator("LED").on_pin(12) \
-        .state("off") \
-            .set("LED").to(LOW) \
-            .when("BUTTON").has_value(HIGH).go_to_state("on") \
-        .state("on") \
-            .set("LED").to(HIGH) \
-            .when("BUTTON").has_value(HIGH).go_to_state("off") \
-        .get_contents()
+    app = (
+        AppBuilder.application("red_button")
+        .uses(AppBuilder.sensor("button", 9))
+        .uses(AppBuilder.actuator("led", 12))
+        .hasForState("on")
+            .setting("led").toHigh().endState()
+            .hasForState("off").initial().setting("led").toLow().endState()
+            .beginTransitionTable()
+                .from_("on").when("button").isHigh().goTo("off")
+                .from_("off").when("button").isHigh().goTo("on") 
+            .endTransitionTable()
+        .build() 
+    )
 
-    print app
+    visitor = ToWiring()
+    app.accept(visitor)
+    generated_code = visitor.get_result() 
 
-def demo2():
-    """
-    Use of a wrapper to avoid some python syntax constraints.
-    + : simpler syntax
-    - : no auto-completion
+    print(generated_code)
 
-    :return:
-    """
-    from pyArduinoML.methodchaining.AppStringBuilder import AppStringBuilder
 
-    app2 = AppStringBuilder("""
-    AppBuilder("Switch!")
-        .sensor("BUTTON").on_pin(9)
-        .actuator("LED").on_pin(12)
-        .state("off")
-            .set("LED").to(LOW)
-            .when("BUTTON").has_value(HIGH).go_to_state("on")
-        .state("on")
-            .set("LED").to(HIGH)
-            .when("BUTTON").has_value(HIGH).go_to_state("off")
-    """)
 
-    print app2
+
+
+
+
 
 if __name__ == '__main__':
-    demo1()
-    demo2()
+    red_button_application()
+
