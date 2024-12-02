@@ -4,11 +4,11 @@ import java.util.List;
 
 import io.github.mosser.arduinoml.kernel.generator.Visitable;
 import io.github.mosser.arduinoml.kernel.generator.Visitor;
-import io.github.mosser.arduinoml.kernel.structural.Sensor;
+import io.github.mosser.arduinoml.kernel.structural.Brick;
 
 public abstract class ConditionTree implements Visitable {
 
-    public abstract List<Sensor> getSensors();
+    public abstract List<Brick> getSensors();
 
     @Override
 	public abstract void accept(Visitor visitor);

@@ -48,7 +48,7 @@ public class ToWiring extends Visitor<StringBuffer> {
 			w("const float " + constant.getName() + " = " + constant.getValue() + ";\n");
 		}
 
-		for(Brick brick: app.getBricks()){
+		for (Brick brick: app.getBricks()){
 			brick.accept(this);
 		}
 
@@ -70,26 +70,49 @@ public class ToWiring extends Visitor<StringBuffer> {
 	}
 
 	@Override
-	public void visit(Actuator actuator) {
+	public void visit(AnalogActuator actuator) {
 		if(context.get("pass") == PASS.ONE) {
 			return;
 		}
 		if(context.get("pass") == PASS.TWO) {
-			w(String.format("  pinMode(%d, OUTPUT); // %s [Actuator]\n", actuator.getPin(), actuator.getName()));
+			w(String.format("  pinMode(%d, OUTPUT); // %s [Analog Actuator] CONNECT TO A%s\n", actuator.getPin(), actuator.getName(), actuator.getPin()));
 			return;
 		}
 	}
 
+	@Override
+	public void visit(DigitalActuator actuator) {
+		if(context.get("pass") == PASS.ONE) {
+			return;
+		}
+		if(context.get("pass") == PASS.TWO) {
+			w(String.format("  pinMode(%d, OUTPUT); // %s [Digital Actuator] CONNECT TO D%s\n", actuator.getPin(), actuator.getName(), actuator.getPin()));
+			return;
+		}
+	}
 
 	@Override
-	public void visit(Sensor sensor) {
+	public void visit(AnalogSensor sensor) {
 		if(context.get("pass") == PASS.ONE) {
 			w(String.format("\nboolean %sBounceGuard = false;\n", sensor.getName()));
 			w(String.format("long %sLastDebounceTime = 0;\n", sensor.getName()));
 			return;
 		}
 		if(context.get("pass") == PASS.TWO) {
-			w(String.format("  pinMode(%d, INPUT);  // %s [Sensor]\n", sensor.getPin(), sensor.getName()));
+			w(String.format("  pinMode(%d, INPUT);  // %s [Analog Sensor] CONNECT TO A%s\n", sensor.getPin(), sensor.getName(), sensor.getPin()));
+			return;
+		}
+	}
+
+	@Override
+	public void visit(DigitalSensor sensor) {
+		if(context.get("pass") == PASS.ONE) {
+			w(String.format("\nboolean %sBounceGuard = false;\n", sensor.getName()));
+			w(String.format("long %sLastDebounceTime = 0;\n", sensor.getName()));
+			return;
+		}
+		if(context.get("pass") == PASS.TWO) {
+			w(String.format("  pinMode(%d, INPUT);  // %s [Digital Sensor] CONNECT TO D%s\n", sensor.getPin(), sensor.getName(), sensor.getPin()));
 			return;
 		}
 	}
@@ -123,16 +146,16 @@ public class ToWiring extends Visitor<StringBuffer> {
 			return;
 		}
 		if(context.get("pass") == PASS.TWO) {
-			List<Sensor> sensors = transition.getCondition().getSensors();
-			List<Sensor> uniqueSensors = new ArrayList<>();
-			for (Sensor sensor : sensors) {
+			List<Brick> sensors = transition.getCondition().getSensors();
+			List<Brick> uniqueSensors = new ArrayList<>();
+			for (Brick sensor : sensors) {
 				if (!uniqueSensors.contains(sensor)) {
 					uniqueSensors.add(sensor);
 				}
 			}
 
 			// Bounce guard
-			for (Sensor sensor : uniqueSensors) {
+			for (Brick sensor : uniqueSensors) {
 				String sensorName = sensor.getName();
 				w(String.format("\t\t\t%sBounceGuard = millis() - %sLastDebounceTime > debounce;\n",
 						sensorName, sensorName));
@@ -141,7 +164,7 @@ public class ToWiring extends Visitor<StringBuffer> {
 			// Start if
 			w(String.format("\t\t\tif("));
 
-			for (Sensor sensor : uniqueSensors) {
+			for (Brick sensor : uniqueSensors) {
 				String sensorName = sensor.getName();
 				w(String.format(" %sBounceGuard &&", sensorName));
 			}
@@ -151,7 +174,7 @@ public class ToWiring extends Visitor<StringBuffer> {
 			// End if
 			w(") {\n");
 			
-			for (Sensor sensor : uniqueSensors) {
+			for (Brick sensor : uniqueSensors) {
 				String sensorName = sensor.getName();
 				w(String.format("\t\t\t\t%sLastDebounceTime = millis();\n", sensorName));
 			}

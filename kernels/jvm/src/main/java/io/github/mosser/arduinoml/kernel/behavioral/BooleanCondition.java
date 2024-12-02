@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.github.mosser.arduinoml.kernel.generator.Visitor;
+import io.github.mosser.arduinoml.kernel.structural.Brick;
 import io.github.mosser.arduinoml.kernel.structural.OPERATOR;
-import io.github.mosser.arduinoml.kernel.structural.Sensor;
 
 public class BooleanCondition extends ConditionTree {
 
@@ -39,8 +39,8 @@ public class BooleanCondition extends ConditionTree {
     }
 
     @Override
-    public List<Sensor> getSensors() {
-        List<Sensor> sensors = new ArrayList<Sensor>();
+    public List<Brick> getSensors() {
+        List<Brick> sensors = new ArrayList<Brick>();
         sensors.addAll(leftTree.getSensors());
         sensors.addAll(rightTree.getSensors());
         return sensors;
