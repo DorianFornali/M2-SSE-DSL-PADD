@@ -1,5 +1,5 @@
 // Wiring code generated from an ArduinoML model
-// Application name: Dual Check Alarm
+// Application name: Auto Pin Allocation
 
 long debounce = 200;
 
@@ -13,28 +13,28 @@ boolean buttonTwoBounceGuard = false;
 long buttonTwoLastDebounceTime = 0;
 
 void setup(){
-  pinMode(9, INPUT);  // buttonOne [Digital Sensor] CONNECT TO D9
-  pinMode(10, INPUT);  // buttonTwo [Digital Sensor] CONNECT TO D10
-  pinMode(12, OUTPUT); // buzzer [Digital Actuator] CONNECT TO D12
+  pinMode(8, INPUT);  // buttonOne [Digital Sensor] CONNECT TO D8
+  pinMode(9, INPUT);  // buttonTwo [Digital Sensor] CONNECT TO D9
+  pinMode(10, OUTPUT); // buzzer [Digital Actuator] CONNECT TO D10
 }
 
 void loop() {
 	switch(currentState){
 		case pressed:
-			digitalWrite(12,HIGH);
+			digitalWrite(10,HIGH);
 			buttonOneBounceGuard = millis() - buttonOneLastDebounceTime > debounce;
 			buttonTwoBounceGuard = millis() - buttonTwoLastDebounceTime > debounce;
-			if( buttonOneBounceGuard && buttonTwoBounceGuard && ( digitalRead(9) == LOW || digitalRead(10) == LOW )) {
+			if( buttonOneBounceGuard && buttonTwoBounceGuard && ( digitalRead(8) == LOW || digitalRead(9) == LOW )) {
 				buttonOneLastDebounceTime = millis();
 				buttonTwoLastDebounceTime = millis();
 				currentState = unpressed;
 			}
 		break;
 		case unpressed:
-			digitalWrite(12,LOW);
+			digitalWrite(10,LOW);
 			buttonOneBounceGuard = millis() - buttonOneLastDebounceTime > debounce;
 			buttonTwoBounceGuard = millis() - buttonTwoLastDebounceTime > debounce;
-			if( buttonOneBounceGuard && buttonTwoBounceGuard && ( digitalRead(9) == HIGH && digitalRead(10) == HIGH )) {
+			if( buttonOneBounceGuard && buttonTwoBounceGuard && ( digitalRead(8) == HIGH && digitalRead(9) == HIGH )) {
 				buttonOneLastDebounceTime = millis();
 				buttonTwoLastDebounceTime = millis();
 				currentState = pressed;

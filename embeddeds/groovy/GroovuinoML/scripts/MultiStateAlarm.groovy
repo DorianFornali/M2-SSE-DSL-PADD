@@ -1,6 +1,6 @@
-sensor "button" onPin 9
-actuator "led" pin 12
-actuator "buzzer" pin 13
+digitalSensor "button" onPin 9
+digitalActuator "led" pin 11
+digitalActuator "buzzer" pin 12
 
 state "initial" means "led" becomes "low" and "buzzer" becomes "low"
 state "buzzerOn" means "led" becomes "low" and "buzzer" becomes "high"

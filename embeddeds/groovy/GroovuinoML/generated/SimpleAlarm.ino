@@ -13,30 +13,30 @@ boolean button2BounceGuard = false;
 long button2LastDebounceTime = 0;
 
 void setup(){
-  pinMode(9, INPUT);  // button [Sensor]
-  pinMode(10, INPUT);  // button2 [Sensor]
-  pinMode(12, OUTPUT); // led [Actuator]
-  pinMode(13, OUTPUT); // buzzer [Actuator]
+  pinMode(8, INPUT);  // button [Digital Sensor] CONNECT TO D8
+  pinMode(9, INPUT);  // button2 [Digital Sensor] CONNECT TO D9
+  pinMode(10, OUTPUT); // led [Digital Actuator] CONNECT TO D10
+  pinMode(11, OUTPUT); // buzzer [Digital Actuator] CONNECT TO D11
 }
 
 void loop() {
 	switch(currentState){
 		case pressed:
-			digitalWrite(12,HIGH);
-			digitalWrite(13,HIGH);
+			digitalWrite(10,HIGH);
+			digitalWrite(11,HIGH);
 			buttonBounceGuard = millis() - buttonLastDebounceTime > debounce;
 			button2BounceGuard = millis() - button2LastDebounceTime > debounce;
-			if( buttonBounceGuard && button2BounceGuard && ( digitalRead(9) == HIGH && digitalRead(10) == HIGH )) {
+			if( buttonBounceGuard && button2BounceGuard && ( digitalRead(8) == HIGH && digitalRead(9) == HIGH )) {
 				buttonLastDebounceTime = millis();
 				button2LastDebounceTime = millis();
 				currentState = unpressed;
 			}
 		break;
 		case unpressed:
-			digitalWrite(12,LOW);
-			digitalWrite(13,LOW);
+			digitalWrite(10,LOW);
+			digitalWrite(11,LOW);
 			buttonBounceGuard = millis() - buttonLastDebounceTime > debounce;
-			if( buttonBounceGuard && digitalRead(9) == LOW ) {
+			if( buttonBounceGuard && digitalRead(8) == LOW ) {
 				buttonLastDebounceTime = millis();
 				currentState = pressed;
 			}

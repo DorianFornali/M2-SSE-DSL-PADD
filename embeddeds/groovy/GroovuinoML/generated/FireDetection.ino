@@ -1,3 +1,6 @@
+Creating analog sensor with name: temperature
+Creating digital actuator with name: buzzer
+Creating digital actuator with pin: 11
 Transition finalized with result: OK
 Transition finalized with result: OK
 // Wiring code generated from an ArduinoML model
@@ -9,14 +12,14 @@ enum STATE {idle, alarming};
 STATE currentState = idle;
 
 // constants
-const float AUTO_CONSTANT_147 = 50.7;
+const float AUTO_CONSTANT_758 = 50.7;
 
 boolean temperatureBounceGuard = false;
 long temperatureLastDebounceTime = 0;
 
 void setup(){
-  pinMode(1, INPUT);  // temperature [Sensor]
-  pinMode(11, OUTPUT); // buzzer [Actuator]
+  pinMode(1, INPUT);  // temperature [Analog Sensor] CONNECT TO A1
+  pinMode(11, OUTPUT); // buzzer [Digital Actuator] CONNECT TO D11
 }
 
 void loop() {
@@ -24,7 +27,7 @@ void loop() {
 		case idle:
 			digitalWrite(11,LOW);
 			temperatureBounceGuard = millis() - temperatureLastDebounceTime > debounce;
-			if( temperatureBounceGuard && analogRead(1) > AUTO_CONSTANT_147 ) {
+			if( temperatureBounceGuard && analogRead(1) > AUTO_CONSTANT_758 ) {
 				temperatureLastDebounceTime = millis();
 				currentState = alarming;
 			}
@@ -32,7 +35,7 @@ void loop() {
 		case alarming:
 			digitalWrite(11,HIGH);
 			temperatureBounceGuard = millis() - temperatureLastDebounceTime > debounce;
-			if( temperatureBounceGuard && analogRead(1) <= AUTO_CONSTANT_147 ) {
+			if( temperatureBounceGuard && analogRead(1) <= AUTO_CONSTANT_758 ) {
 				temperatureLastDebounceTime = millis();
 				currentState = idle;
 			}

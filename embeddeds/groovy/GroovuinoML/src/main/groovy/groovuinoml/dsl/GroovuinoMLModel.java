@@ -23,24 +23,59 @@ public class GroovuinoMLModel {
 		this.constants = new ArrayList<Constant>();
 		this.binding = binding;
 	}
-	
-	public void createSensor(String name, Integer pinNumber) {
-		Sensor sensor = new Sensor();
+
+	public void createDigitalSensor(String name) {
+		DigitalSensor sensor = new DigitalSensor();
+		createSensor(sensor, name);
+	}
+
+	public void createDigitalSensor(String name, Integer pinNumber) {
+		DigitalSensor sensor = new DigitalSensor(pinNumber);
+		createSensor(sensor, name);
+	}
+
+	public void createAnalogSensor(String name) {
+		AnalogSensor sensor = new AnalogSensor();
+		createSensor(sensor, name);
+	}
+
+	public void createAnalogSensor(String name, Integer pinNumber) {
+		AnalogSensor sensor = new AnalogSensor(pinNumber);
+		createSensor(sensor, name);
+	}
+
+	public void createSensor(Brick sensor, String name) {
 		sensor.setName(name);
-		sensor.setPin(pinNumber);
 		this.bricks.add(sensor);
 		this.binding.setVariable(name, sensor);
-//		System.out.println("> sensor " + name + " on pin " + pinNumber);
 	}
-	
-	public void createActuator(String name, Integer pinNumber) {
-		Actuator actuator = new Actuator();
+
+	public void createDigitalActuator(String name) {
+		DigitalActuator actuator = new DigitalActuator();
+		createActuator(actuator, name);
+	}
+
+	public void createDigitalActuator(String name, Integer pinNumber) {
+		DigitalActuator actuator = new DigitalActuator(pinNumber);
+		createActuator(actuator, name);
+	}
+
+	public void createAnalogActuator(String name) {
+		AnalogActuator actuator = new AnalogActuator();
+		createActuator(actuator, name);
+	}
+
+	public void createAnalogActuator(String name, Integer pinNumber) {
+		AnalogActuator actuator = new AnalogActuator(pinNumber);
+		createActuator(actuator, name);
+	}
+
+	public void createActuator(Brick actuator, String name) {
 		actuator.setName(name);
-		actuator.setPin(pinNumber);
 		this.bricks.add(actuator);
 		this.binding.setVariable(name, actuator);
 	}
-	
+
 	public void createState(String name, List<Action> actions) {
 		State state = new State();
 		state.setName(name);
@@ -49,14 +84,6 @@ public class GroovuinoMLModel {
 		this.binding.setVariable(name, state);
 	}
 
-	public void createTransition(State from, State to, Sensor sensor, SIGNAL value) {
-		SignalTransition transition = new SignalTransition();
-		transition.setNext(to);
-//		transition.setSensor(sensor);
-//		transition.setValue(value);
-//		from.setTransition(transition);
-	}
-	
 	public void createTransition(State from, State to, List<Map<String, Object>> conditions) {
 		SignalTransition transition = new SignalTransition();
 		transition.setNext(to);
@@ -91,8 +118,8 @@ public class GroovuinoMLModel {
 
 	private DigitalCondition parseDigitalCondition(Map<String, Object> condition) {
 		DigitalCondition digitalCondition = new DigitalCondition();
-		String sensorName = ((Sensor) condition.get("sensor")).getName();
-		Sensor sensor = (Sensor) this.binding.getVariable(sensorName);
+		String sensorName = ((DigitalSensor) condition.get("sensor")).getName();
+		DigitalSensor sensor = (DigitalSensor) this.binding.getVariable(sensorName);
 		SIGNAL value = (SIGNAL) condition.get("signal");
 		digitalCondition.setSensor(sensor);
 		digitalCondition.setValue(value);
@@ -101,35 +128,29 @@ public class GroovuinoMLModel {
 
 	private AnalogCondition parseAnalogCondition(Map<String, Object> condition) {
 		AnalogCondition analogCondition = new AnalogCondition();
-		String sensorName = ((Sensor) condition.get("sensor")).getName();
-		Sensor sensor = (Sensor) this.binding.getVariable(sensorName);
+		String sensorName = ((AnalogSensor) condition.get("sensor")).getName();
+		AnalogSensor sensor = (AnalogSensor) this.binding.getVariable(sensorName);
+		analogCondition.setSensor(sensor);
+		analogCondition.setComparator(COMPARATOR.valueOf((String) condition.get("comparator")));
+		analogCondition.setValue(getConstant(Double.parseDouble((String) condition.get("value").toString())));
+		return analogCondition;
+	}
+
+	private Constant getConstant(Double value) {
 		Constant constant = null;
 		for (Constant c : this.constants) {
-			if (c.getValue() == Double.parseDouble((String) condition.get("value").toString())) {
+			if (c.getValue() == value) {
 				constant = c;
 				break;
 			}
 		}
 		if (constant == null) {
 			Random rand = new Random();
-			constant = new Constant("AUTO_CONSTANT_" + rand.nextInt(1000), Double.parseDouble((String) condition.get("value").toString()));
+			constant = new Constant("AUTO_CONSTANT_" + rand.nextInt(1000), value);
 			this.constants.add(constant);
 		}
-		analogCondition.setSensor(sensor);
-		analogCondition.setComparator(COMPARATOR.valueOf((String) condition.get("comparator")));
-		analogCondition.setValue(constant);
-		return analogCondition;
+		return constant;
 	}
-
-
-	// Implement this when we need Temporal transitions
-//	public void createTransition(State from, State to, int delay) {
-//		TimeTransition transition = new TimeTransition();
-//		transition.setNext(to);
-//		transition.setDelay(delay);
-//		from.setTransition(transition);
-//	}
-
 
 	public void setInitialState(State state) {
 		this.initialState = state;

@@ -1,7 +1,7 @@
-sensor "button" onPin 9
-sensor "button2" onPin 10
-actuator "led" pin 12
-actuator "buzzer" pin 13
+digitalSensor "button" onPin 8
+digitalSensor "button2" onPin 9
+digitalActuator "led" pin 10
+digitalActuator "buzzer" pin 11
 
 state "pressed" means "led" becomes "high" and "buzzer" becomes "high"
 state "unpressed" means "led" becomes "low" and "buzzer" becomes "low"

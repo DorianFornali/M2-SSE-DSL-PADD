@@ -1,5 +1,5 @@
-sensor "temperature" onPin 1
-actuator "buzzer" pin 11
+analogSensor "temperature" onPin 1
+digitalActuator "buzzer" pin 11
 
 state "idle" means "buzzer" becomes "low"
 state "alarming" means "buzzer" becomes "high"

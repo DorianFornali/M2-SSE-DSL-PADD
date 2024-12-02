@@ -1,29 +1,80 @@
 package groovuinoml.dsl
 
+import io.github.mosser.arduinoml.kernel.behavioral.AnalogAction
 import io.github.mosser.arduinoml.kernel.behavioral.DigitalAction
-import io.github.mosser.arduinoml.kernel.behavioral.TimeUnit
 import io.github.mosser.arduinoml.kernel.behavioral.Action
 import io.github.mosser.arduinoml.kernel.behavioral.State
-import io.github.mosser.arduinoml.kernel.structural.Actuator
-import io.github.mosser.arduinoml.kernel.structural.Sensor
+import io.github.mosser.arduinoml.kernel.structural.AnalogActuator
+import io.github.mosser.arduinoml.kernel.structural.Brick
+import io.github.mosser.arduinoml.kernel.structural.Constant
+import io.github.mosser.arduinoml.kernel.structural.DigitalActuator
 import io.github.mosser.arduinoml.kernel.structural.SIGNAL
 
 abstract class GroovuinoMLBasescript extends Script {
-//	public static Number getDuration(Number number, TimeUnit unit) throws IOException {
-//		return number * unit.inMillis;
-//	}
 
-	// sensor "name" pin n
-	def sensor(String name) {
-		[pin: { n -> ((GroovuinoMLBinding)this.getBinding()).getGroovuinoMLModel().createSensor(name, n) },
-		onPin: { n -> ((GroovuinoMLBinding)this.getBinding()).getGroovuinoMLModel().createSensor(name, n)}]
+	private List<Constant> constants;
+
+	// analogSensor "name" [pin n]
+	def analogSensor(String name) {
+		System.out.println("Creating analog sensor with name: ${name}")
+		def createSensor = { n ->
+			if (n != null) {
+				((GroovuinoMLBinding)this.getBinding()).getGroovuinoMLModel().createAnalogSensor(name, n)
+			} else {
+				((GroovuinoMLBinding)this.getBinding()).getGroovuinoMLModel().createAnalogSensor(name)
+			}
+		}
+
+		[pin: { n -> createSensor(n) },
+		 onPin: { n -> createSensor(n) },
+		 done: { val -> createSensor() }]
 	}
-	
-	// actuator "name" pin n
-	def actuator(String name) {
-		[pin: { n -> ((GroovuinoMLBinding)this.getBinding()).getGroovuinoMLModel().createActuator(name, n) }]
+
+	// digitalSensor "name" [pin n]
+	def digitalSensor(String name) {
+		def createSensor = { n ->
+			if (n != null) {
+				((GroovuinoMLBinding)this.getBinding()).getGroovuinoMLModel().createDigitalSensor(name, n)
+			} else {
+				((GroovuinoMLBinding)this.getBinding()).getGroovuinoMLModel().createDigitalSensor(name)
+			}
+		}
+
+		[pin: { n -> createSensor(n) },
+		 onPin: { n -> createSensor(n) },
+		 done: { val -> createSensor() }]
 	}
-	
+
+	// analogActuator "name" [pin n]
+	def analogActuator(String name) {
+		def createActuator = { n ->
+			if (n != null) {
+				((GroovuinoMLBinding)this.getBinding()).getGroovuinoMLModel().createAnalogActuator(name, n)
+			} else {
+				((GroovuinoMLBinding)this.getBinding()).getGroovuinoMLModel().createAnalogActuator(name)
+			}
+		}
+
+		[pin: { n -> createActuator(n) },
+		 onPin: { n -> createActuator(n) },
+		 done: { val -> createActuator() }]
+	}
+
+	// digitalActuator "name" [pin n]
+	def digitalActuator(String name) {
+		def createActuator = { n = null ->
+			if (n != null) {
+				((GroovuinoMLBinding) this.getBinding()).getGroovuinoMLModel().createDigitalActuator(name, n)
+			} else {
+				((GroovuinoMLBinding) this.getBinding()).getGroovuinoMLModel().createDigitalActuator(name)
+			}
+		}
+
+		[pin: { n -> createActuator(n) },
+		 onPin: { n -> createActuator(n) },
+		 done: { val -> createActuator() }]
+	}
+
 	// state "name" means actuator becomes signal [and actuator becomes signal]*n
 	def state(String name) {
 		List<Action> actions = new ArrayList<Action>()
@@ -32,14 +83,37 @@ abstract class GroovuinoMLBasescript extends Script {
 		def closure
 		closure = { actuator -> 
 			[becomes: { signal ->
-				DigitalAction action = new DigitalAction()
-				action.setActuator(actuator instanceof String ? (Actuator)((GroovuinoMLBinding)this.getBinding()).getVariable(actuator) : (Actuator)actuator)
-				action.setValue(signal instanceof String ? (SIGNAL)((GroovuinoMLBinding)this.getBinding()).getVariable(signal) : (SIGNAL)signal)
+				Action action = null;
+				if (signal instanceof String) {
+					action = new DigitalAction();
+					action.setActuator(actuator instanceof String ? (DigitalActuator)((GroovuinoMLBinding)this.getBinding()).getVariable(actuator) : (DigitalActuator)actuator);
+					action.setValue(signal instanceof String ? (SIGNAL)((GroovuinoMLBinding)this.getBinding()).getVariable(signal) : SIGNAL.valueOf(signal));
+				} else {
+					action = new AnalogAction();
+					action.setActuator(actuator instanceof String ? (AnalogActuator)((GroovuinoMLBinding)this.getBinding()).getVariable(actuator) : (AnalogActuator)actuator);
+					action.setValue(getConstant(signal));
+				}
 				actions.add(action)
 				[and: closure]
 			}]
 		}
 		[means: closure]
+	}
+
+	private Constant getConstant(Double value) {
+		Constant constant = null;
+		for (Constant c : this.constants) {
+			if (c.getValue() == value) {
+				constant = c;
+				break;
+			}
+		}
+		if (constant == null) {
+			Random rand = new Random();
+			constant = new Constant("AUTO_CONSTANT_" + rand.nextInt(1000), value);
+			this.constants.add(constant);
+		}
+		return constant;
 	}
 	
 	// initial state
@@ -57,9 +131,8 @@ abstract class GroovuinoMLBasescript extends Script {
 
 			def addComparisonCondition = { sensor, value, operator ->
 				transitionBuilder.addCondition(
-						sensor instanceof String ? (Sensor)((GroovuinoMLBinding)this.getBinding()).getVariable(sensor) : (Sensor)sensor,
+						sensor instanceof String ? (Brick)((GroovuinoMLBinding)this.getBinding()).getVariable(sensor) : (Brick)sensor,
 						value,
-						null,
 						operator
 				)
 				[and: { nextSensor -> closure(nextSensor, "AND") }, or: { nextSensor -> closure(nextSensor, "OR") },
@@ -73,15 +146,13 @@ abstract class GroovuinoMLBasescript extends Script {
 			closure = { sensor, logicalOperator = null ->
 				[becomes: { signal ->
 					transitionBuilder.addCondition(
-							sensor instanceof String ? (Sensor)((GroovuinoMLBinding)this.getBinding()).getVariable(sensor) : (Sensor)sensor,
+							sensor instanceof String ? (Brick)((GroovuinoMLBinding)this.getBinding()).getVariable(sensor) : (Brick)sensor,
 							signal instanceof String ? (SIGNAL)((GroovuinoMLBinding)this.getBinding()).getVariable(signal) : (SIGNAL)signal,
-							logicalOperator,
-							null
+							logicalOperator == null ? "EQ" : logicalOperator
 					)
 					[and: { nextSensor -> closure(nextSensor, "AND") }, or: { nextSensor -> closure(nextSensor, "OR") },
 					 done: { val ->
 						 transitionBuilder.finalizeTransition(this.getBinding() as GroovuinoMLBinding)
-						 println "Transition finalized with result: ${val}"
 					 }]
 				},
 				 GT: { value -> addComparisonCondition(sensor, value, "GT") },
@@ -125,20 +196,20 @@ class TransitionBuilder {
 		this.toState = toState
 	}
 
-	void addCondition(Sensor sensor, SIGNAL signal, String operator, Optional<String> comparator) {
+	void addCondition(Brick sensor, SIGNAL signal, String operator) {
 		conditions.add([
 				sensor: sensor,
 				signal: signal,
 				operator: operator,
-				comparator: comparator
+				comparator: null
 		])
 	}
 
-	void addCondition(Sensor sensor, Number value, Optional<String> operator, String comparator) {
+	void addCondition(Brick sensor, Number value,String comparator) {
 		conditions.add([
 				sensor: sensor,
 				value: value,
-				operator: operator,
+				operator: null,
 				comparator: comparator
 		])
 	}

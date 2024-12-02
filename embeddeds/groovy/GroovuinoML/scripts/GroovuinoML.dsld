@@ -16,8 +16,10 @@ contribute(currentType(subType('groovy.lang.Script'))) {
 //	property name : 'on', type : Object, provider: 'GroovuinoML', doc: 'A variable'
 //	property name : 'off', type : Object, provider: 'GroovuinoML', doc: 'A variable'
 
-	method type: Script, name: 'sensor', params: [name:String], doc: 'Create a new Sensor'
-	method type: Script, name: 'actuator', params: [name:String], doc: 'Create a new Actuator'
+	method type: Script, name: 'digitalSensor', params: [name:String], doc: 'Create a new DigitalSensor'
+	method type: Script, name: 'digitalActuator', params: [name:String], doc: 'Create a new DigitalActuator'
+	method type: Script, name: 'analogSensor', params: [name:String], doc: 'Create a new AnalogSensor'
+	method type: Script, name: 'analogActuator', params: [name:String], doc: 'Create a new AnalogActuator'
 	method type: void, name: 'pin', params: [pinNumber:Integer], doc: 'Associate Sensor or Actuator to a pin number'
 	method type: void, name: 'onPin', params: [pinNumber:Integer], doc: 'Associate Sensor or Actuator to a pin number'
 
