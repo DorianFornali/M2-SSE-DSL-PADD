@@ -20,9 +20,10 @@ public abstract class Visitor<T> {
 	public abstract void visit(DigitalCondition digitalCondition);
 	public abstract void visit(AnalogCondition analogCondition);
 
-	public abstract void visit(Actuator actuator);
-	public abstract void visit(Sensor sensor);
-
+	public abstract void visit(AnalogActuator analogActuator);
+	public abstract void visit(DigitalActuator digitalActuator);
+	public abstract void visit(AnalogSensor analogSensor);
+	public abstract void visit(DigitalSensor digitalSensor);
 
 	/***********************
 	 ** Helper mechanisms **

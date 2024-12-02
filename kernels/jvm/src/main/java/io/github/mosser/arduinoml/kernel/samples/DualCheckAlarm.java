@@ -8,10 +8,10 @@ import io.github.mosser.arduinoml.kernel.behavioral.SignalTransition;
 import io.github.mosser.arduinoml.kernel.behavioral.State;
 import io.github.mosser.arduinoml.kernel.generator.ToWiring;
 import io.github.mosser.arduinoml.kernel.generator.Visitor;
-import io.github.mosser.arduinoml.kernel.structural.Actuator;
+import io.github.mosser.arduinoml.kernel.structural.DigitalActuator;
+import io.github.mosser.arduinoml.kernel.structural.DigitalSensor;
 import io.github.mosser.arduinoml.kernel.structural.OPERATOR;
 import io.github.mosser.arduinoml.kernel.structural.SIGNAL;
-import io.github.mosser.arduinoml.kernel.structural.Sensor;
 
 import java.util.Arrays;
 
@@ -19,17 +19,14 @@ public class DualCheckAlarm {
     public static void main(String[] args) {
 
         // Declaring elementary bricks
-        Sensor button1 = new Sensor();
+        DigitalSensor button1 = new DigitalSensor();
         button1.setName("button1");
-        button1.setPin(9);
 
-        Sensor button2 = new Sensor();
+        DigitalSensor button2 = new DigitalSensor();
         button2.setName("button2");
-        button2.setPin(10);
 
-        Actuator buzzer = new Actuator();
+        DigitalActuator buzzer = new DigitalActuator();
         buzzer.setName("Buzzer");
-        buzzer.setPin(13);
 
         // Declaring states
         State unpressed = new State();

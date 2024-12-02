@@ -7,9 +7,9 @@ import io.github.mosser.arduinoml.kernel.behavioral.SignalTransition;
 import io.github.mosser.arduinoml.kernel.behavioral.State;
 import io.github.mosser.arduinoml.kernel.generator.ToWiring;
 import io.github.mosser.arduinoml.kernel.generator.Visitor;
-import io.github.mosser.arduinoml.kernel.structural.Actuator;
+import io.github.mosser.arduinoml.kernel.structural.DigitalActuator;
+import io.github.mosser.arduinoml.kernel.structural.DigitalSensor;
 import io.github.mosser.arduinoml.kernel.structural.SIGNAL;
-import io.github.mosser.arduinoml.kernel.structural.Sensor;
 
 import java.util.Arrays;
 
@@ -17,13 +17,11 @@ public class StateBasedAlarm {
     public static void main(String[] args) {
 
         // Declaring elementary bricks
-        Sensor button = new Sensor();
+        DigitalSensor button = new DigitalSensor();
         button.setName("button");
-        button.setPin(9);
 
-        Actuator led = new Actuator();
+        DigitalActuator led = new DigitalActuator();
         led.setName("LED");
-        led.setPin(12);
 
         // Declaring states
         State on = new State();
