@@ -1,5 +1,6 @@
 __author__ = 'pascalpoizat'
-
+from pyArduinoML.methodchaining.AppBuilder import AppBuilder
+from pyArduinoML.generator.ToWiring import ToWiring
 """
 DSL version of the demo application
 uses MethodChaining, nothing Python-specific
@@ -14,11 +15,8 @@ def red_button_application():
 
     :return:
     """
-    from pyArduinoML.methodchaining.AppBuilder import AppBuilder
-    from pyArduinoML.generator.ToWiring import ToWiring
-
     app = (
-        AppBuilder.application("red_button")
+        AppBuilder.application("RedButton")
         .uses(AppBuilder.sensor("button", 9))
         .uses(AppBuilder.actuator("led", 12))
         
@@ -40,14 +38,10 @@ def red_button_application():
 
     print(generated_code)
 
-
 def very_simple_alarm():
     """
     Demonstrates the VerySimpleAlarm scenario in Python.
     """
-
-    from pyArduinoML.methodchaining.AppBuilder import AppBuilder
-    from pyArduinoML.generator.ToWiring import ToWiring
 
     # Define the app
     app = (
@@ -78,10 +72,6 @@ def very_simple_alarm():
         .endTransitionTable()
         .build()
     )
-    
-
-
-
     # Generate Wiring code using ToWiring visitor
     visitor = ToWiring()
     app.accept(visitor)
@@ -89,6 +79,57 @@ def very_simple_alarm():
 
     # Print the generated Wiring code
     print(generated_code)
+
+def multi_state_alarm():
+    app = (
+        AppBuilder.application("MultiStateAlarm")
+        .uses(AppBuilder.sensor("button", 9))
+        .uses(AppBuilder.actuator("led", 11))
+        .uses(AppBuilder.actuator("buzzer", 12))
+        
+        .hasForState("initial").initial()
+            .setting("led").toLow()
+            .setting("buzzer").toLow()
+        .endState()
+        
+        .hasForState("buzzerOn")
+            .setting("buzzer").toHigh()
+        .endState()
+        
+        .hasForState("ledOn")
+            .setting("led").toHigh()
+            .setting("buzzer").toLow()
+        .endState()
+        
+        .beginTransitionTable()
+            .from_("initial")
+                .when("button").isHigh().end_when()
+            .go_to("buzzerOn")
+            
+            .from_("buzzerOn")
+                .when("button").isHigh().end_when()
+            .go_to("ledOn")
+            
+            .from_("ledOn")
+                .when("button").isHigh().end_when()
+            .go_to("initial")
+        .endTransitionTable()
+        .build()
+    )
+    
+    # Generate Wiring code using ToWiring visitor
+    visitor = ToWiring()
+    app.accept(visitor)
+    generated_code = visitor.get_result()
+
+    # Print the generated Wiring code
+    print(generated_code)
+    
+
+
+
+    
+
 
 
 

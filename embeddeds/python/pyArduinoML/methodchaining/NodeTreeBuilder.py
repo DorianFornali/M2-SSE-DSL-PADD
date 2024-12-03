@@ -75,7 +75,6 @@ class NodeTreeBuilder:
             operator=operator
         )
 
-
     def terminal_case(self, tokens):
         """
         Handle the terminal case (leaf nodes of the ConditionTree).
@@ -117,7 +116,6 @@ class NodeTreeBuilder:
             node.comparator = comparator  # Use attribute assignment
 
             self.local = node
-
 
     def translate_comparator(self, token):
         """

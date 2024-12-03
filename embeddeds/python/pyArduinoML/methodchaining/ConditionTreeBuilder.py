@@ -62,7 +62,6 @@ class ConditionTreeBuilder:
         self.parent.local.value = Signal.LOW
         return self
 
-
     def open_parenthesis(self):
         """
         Add an opening parenthesis to the condition.

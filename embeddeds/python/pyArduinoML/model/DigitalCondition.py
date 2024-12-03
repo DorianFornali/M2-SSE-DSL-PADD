@@ -42,7 +42,6 @@ class DigitalCondition(Condition):
         :return: bool, whether the condition is satisfied.
         """
         return self.sensor.value == self.value
-    
 
     def __str__(self):
         """
