@@ -19,8 +19,8 @@ class NodeTreeBuilder:
         :param parent: TransitionBuilder, the parent transition builder.
         :param sub_tree: str, the condition string to parse.
         """
-        self.parent = parent
-        self.sub_tree = sub_tree
+        self.parent = parent # Reference to the TransitionBuilder
+        self.sub_tree = sub_tree # The condition string to parse
         self.local = None  # The ConditionTree built from this NodeTreeBuilder
 
     def parse_condition_string(self):

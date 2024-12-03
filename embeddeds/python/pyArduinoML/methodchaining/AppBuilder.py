@@ -97,8 +97,9 @@ class AppBuilder:
         # Create lookup tables for states and sensors
         state_table = {state.name: state for state in self.the_app.states}
         sensor_table = {brick.name: brick for brick in self.the_app.bricks if isinstance(brick, Sensor)}
+        constant_table = {constant.name: constant for constant in self.the_app.constants}
 
-        return TransitionTableBuilder(self, state_table, sensor_table)
+        return TransitionTableBuilder(self, state_table, sensor_table, constant_table)
 
     def constant(self, name, value):
         """

@@ -26,6 +26,7 @@ class ConditionTreeBuilder:
         self.parent = parent
         self.current_condition = ""  # String representing the condition being built
         self.sensor = None 
+        self.logical_operator = None 
 
     def add_sensor(self, sensor_name):
         """
@@ -35,7 +36,6 @@ class ConditionTreeBuilder:
         :return: self
         """
         self.sensor = self.parent.parent.find_sensor(sensor_name)
-        print("The setted sensor in ConditionTreeBuilder:", self.sensor.name)
         if self.sensor is None:
             raise ValueError(f"Unknown sensor: [{sensor_name}]")
         self.parent.local.sensor = self.sensor
@@ -79,8 +79,8 @@ class ConditionTreeBuilder:
         :param value: str, the value to compare.
         :return: self
         """
-        self.current_condition += " == "
-        return self.value(value)
+        self.current_condition += f" == {value}"
+        return self
 
     def different_from(self, value):
         """
@@ -89,8 +89,8 @@ class ConditionTreeBuilder:
         :param value: str, the value to compare.
         :return: self
         """
-        self.current_condition += " != "
-        return self.value(value)
+        self.current_condition += f" != {value}"
+        return self
 
     def greater_than(self, value):
         """
@@ -99,8 +99,8 @@ class ConditionTreeBuilder:
         :param value: str, the value to compare.
         :return: self
         """
-        self.current_condition += " > "
-        return self.value(value)
+        self.current_condition += f" > {value}"
+        return self
 
     def greater_or_equals(self, value):
         """
@@ -109,8 +109,8 @@ class ConditionTreeBuilder:
         :param value: str, the value to compare.
         :return: self
         """
-        self.current_condition += " >= "
-        return self.value(value)
+        self.current_condition += f" >= {value}"
+        return self
 
     def less_than(self, value):
         """
@@ -119,8 +119,8 @@ class ConditionTreeBuilder:
         :param value: str, the value to compare.
         :return: self
         """
-        self.current_condition += " < "
-        return self.value(value)
+        self.current_condition += f" < {value}"
+        return self
 
     def less_or_equals(self, value):
         """
@@ -129,8 +129,8 @@ class ConditionTreeBuilder:
         :param value: str, the value to compare.
         :return: self
         """
-        self.current_condition += " <= "
-        return self.value(value)
+        self.current_condition += f" <= {value}"
+        return self
 
     def value(self, value):
         """
@@ -158,6 +158,7 @@ class ConditionTreeBuilder:
         :return: self
         """
         self.current_condition += " && "
+        self.logical_operator = "AND"
         return self
 
     def or_(self):
@@ -167,6 +168,7 @@ class ConditionTreeBuilder:
         :return: self
         """
         self.current_condition += " || "
+        self.logical_operator = "OR"
         return self
 
     def end_when(self):

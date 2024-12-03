@@ -5,7 +5,7 @@ class TransitionTableBuilder:
     Builder for defining the transition table.
     """
 
-    def __init__(self, parent, states: dict, sensors: dict):
+    def __init__(self, parent, states: dict, sensors: dict, constants: dict):
         """
         Constructor for TransitionTableBuilder.
 
@@ -16,6 +16,7 @@ class TransitionTableBuilder:
         self.parent = parent
         self.states = states
         self.sensors = sensors
+        self.constants = constants 
 
     def from_(self, state_name):
         """
@@ -60,3 +61,48 @@ class TransitionTableBuilder:
         if state is None:
             raise ValueError(f"Unknown state: [{state_name}]")
         return state
+    
+
+    def is_constant (self, constant_name):
+        """
+        Check if a constant exists.
+
+        :param constant_name: str, the name of the constant.
+        :return: bool, whether the constant exists.
+        """
+        return constant_name in self.constants
+
+
+
+    def find_constant (self, constant_name):
+        """
+        Find a constant by name.
+
+        :param constant_name: str, the name of the constant.
+        :return: Constant instance.
+        :raises ValueError: if the constant is not found.
+        """
+        constant = self.constants.get(constant_name)
+        if constant is None:
+            raise ValueError(f"Unknown constant: [{constant_name}]")
+        return constant
+
+    def value_already_present(self, value):
+        """
+        Check if a constant with the given value already exists.
+
+        :param value: float, the value to check.
+        :return: Constant instance or None.
+        """
+        for constant in self.constants.values():
+            if constant.value == value:
+                return constant
+        return None
+    
+    def add_constant(self, constant):
+        """
+        Add a constant to the list of known constants.
+
+        :param constant: Constant, the constant to add.
+        """
+        self.constants[constant.name] = constant
