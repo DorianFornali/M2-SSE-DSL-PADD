@@ -2,6 +2,7 @@ from pyArduinoML.model.Transition import Transition
 from pyArduinoML.model.DigitalCondition import DigitalCondition
 from pyArduinoML.model.SIGNAL import Signal
 from pyArduinoML.model.SignalTransition import SignalTransition
+from pyArduinoML.methodchaining.ConditionTreeBuilder import ConditionTreeBuilder
 from pyArduinoML.methodchaining.UndefinedBrick import UndefinedBrick
 from pyArduinoML.methodchaining.UndefinedState import UndefinedState
 
@@ -16,45 +17,32 @@ class TransitionBuilder:
         Constructor for TransitionBuilder.
 
         :param parent: TransitionTableBuilder, the parent builder.
-        :param source_state_name: str, the name of the source state for the transition.
+        :param source_state_name: str, the name of the source state.
         """
         self.parent = parent
-        self.local = SignalTransition() 
-        source_state = self.parent.find_state(source_state_name).set_transition(self.local)
+        self.local = SignalTransition()
+        source_state = self.parent.find_state(source_state_name)
+        if source_state is None:
+            raise ValueError(f"Unknown state: [{source_state_name}]")
+        source_state.set_transition(self.local)
 
         
 
-    def when(self, sensor_name):
+    def when(self, sensor_name=None):
         """
-        Define the sensor used in the transition condition.
+        Start defining a condition tree for the transition.
 
-        :param sensor_name: str, the name of the sensor.
-        :return: self
+        :param sensor_name: str, the name of the sensor (optional).
+        :return: ConditionTreeBuilder
         """
-        sensor = self.parent.find_sensor(sensor_name)
-        self.local.set_sensor(sensor)
-        return self
+        print ("TransitionBuilder.when with: ", sensor_name)
+        self.condition_tree_builder = ConditionTreeBuilder(self)
+        if sensor_name:
+            self.condition_tree_builder.add_sensor(sensor_name)
+            print("The setted sensor:", self.condition_tree_builder.sensor)
+        return self.condition_tree_builder
 
-    def isHigh(self):
-        """
-        Set the condition to trigger when the sensor signal is HIGH.
-
-        :return: self
-        """
-        self.local.set_value(Signal.HIGH)
-        return self
-
-    def isLow(self):
-        """
-        Set the condition to trigger when the sensor signal is LOW.
-
-        :return: self
-        """
-        
-        self.local.set_value(Signal.LOW) 
-        return self
-
-    def goTo(self, target_state_name):
+    def go_to(self, target_state_name):
         """
         Define the target state for the transition.
 
@@ -62,5 +50,7 @@ class TransitionBuilder:
         :return: TransitionTableBuilder
         """
         target_state = self.parent.find_state(target_state_name)
+        if target_state is None:
+            raise ValueError(f"Target state '{target_state_name}' not found.")
         self.local.next = target_state
         return self.parent

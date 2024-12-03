@@ -1,7 +1,7 @@
 from typing import List
-from ConditionTree import ConditionTree
-from OPERATOR import OPERATOR
-from Sensor import Sensor
+from pyArduinoML.model.ConditionTree import ConditionTree
+from pyArduinoML.model.OPERATOR import OPERATOR
+from pyArduinoML.model.Sensor import Sensor
 
 class BooleanCondition(ConditionTree):
 

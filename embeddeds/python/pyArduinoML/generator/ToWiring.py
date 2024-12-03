@@ -85,6 +85,8 @@ class ToWiring:
         :param transition: SignalTransition instance.
         """
         if self.context['pass'] == 'TWO':
+            if transition.sensor is None:
+                raise ValueError("SignalTransition is missing a sensor.")
             sensor_name = transition.sensor.name
             self.w(f"\t\t\t{sensor_name}BounceGuard = millis() - {sensor_name}LastDebounceTime > debounce;")
             self.w(f"\t\t\tif (digitalRead({transition.sensor.pin}) == {transition.value} && {sensor_name}BounceGuard) {{")

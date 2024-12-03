@@ -8,14 +8,12 @@ class DigitalCondition(Condition):
     Represents a digital condition based on a signal value.
     """
 
-    def __init__(self, sensor: Sensor, value: Signal):
+    def __init__(self):
         """
-        Constructor for DigitalCondition.
-
-        :param value: Signal, the signal value (HIGH or LOW)
+        Initialize the DigitalCondition without requiring parameters.
         """
-        super().__init__(sensor)
-        self._value = value
+        super().__init__()
+        self._value = None  # Signal value (HIGH or LOW)
 
     @property
     def value(self) -> Signal:
