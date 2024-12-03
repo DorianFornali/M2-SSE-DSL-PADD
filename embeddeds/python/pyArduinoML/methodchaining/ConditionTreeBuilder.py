@@ -18,7 +18,7 @@ class ConditionTreeBuilder:
         return name
 
     def __init__(self, parent):
-        """
+        """ 
         Constructor for ConditionTreeBuilder.
 
         :param parent: TransitionBuilder, the parent builder for transitions.

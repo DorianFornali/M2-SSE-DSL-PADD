@@ -91,9 +91,9 @@ class BooleanCondition(ConditionTree):
         """
         sensors = []
         if self._left_tree:
-            sensors.extend(self._left_tree.get_sensors())
+            sensors.extend(self._left_tree.getSensors())
         if self._right_tree:
-            sensors.extend(self._right_tree.get_sensors())
+            sensors.extend(self._right_tree.getSensors())
         return sensors
     
     def evaluate(self) -> bool:
@@ -116,4 +116,8 @@ class BooleanCondition(ConditionTree):
         else:
             raise ValueError(f"Invalid operator: {self._operator}")
 
+    def accept(self, visitor):
+        self.left_tree.accept(visitor)
+        visitor.visit_boolean_operator(self._operator)
+        self.right_tree.accept(visitor)
     

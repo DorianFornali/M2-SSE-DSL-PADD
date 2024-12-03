@@ -4,5 +4,9 @@ from typing import List
 
 class ConditionTree(ABC):
     @abstractmethod 
+    def getSensors():
+        pass 
+    
+    @abstractmethod
     def evaluate(self) -> bool:
         pass 

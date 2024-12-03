@@ -31,3 +31,7 @@ class Condition (ConditionTree):
         Must be implemented by subclasses.
         """
         pass
+
+    @abstractmethod
+    def getSensors():
+        pass

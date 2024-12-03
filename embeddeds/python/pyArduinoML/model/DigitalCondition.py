@@ -1,6 +1,5 @@
 from pyArduinoML.model.Condition import Condition
 from pyArduinoML.model.SIGNAL import Signal
-from pyArduinoML.model.Sensor import Sensor
 
 
 class DigitalCondition(Condition):
@@ -43,10 +42,21 @@ class DigitalCondition(Condition):
         """
         return self.sensor.value == self.value
 
-    def __str__(self):
+    def getSensors(self):
         """
-        String representation of the DigitalCondition.
+        Collects all sensors involved in the condition.
 
-        :return: str, a description of the condition.
+        :return: List[Sensor]
         """
-        return f"DigitalCondition(sensor={self.sensor.name}, value={self.value})"
+        return [self.sensor]
+    
+    def accept(self, visitor):
+        visitor.visit_digital_condition(self)
+
+    # def __str__(self):
+    #     """
+    #     String representation of the DigitalCondition.
+
+    #     :return: str, a description of the condition.
+    #     """
+    #     return f"DigitalCondition(sensor={self.sensor.name}, value={self.value})"

@@ -7,7 +7,7 @@ uses MethodChaining, nothing Python-specific
 """
 
 
-def red_button_application():
+def state_based_alarm():
     """
     Direct use of the DSL.
     + : auto-completion (limited due to python typing system)
@@ -125,18 +125,41 @@ def multi_state_alarm():
     # Print the generated Wiring code
     print(generated_code)
     
+def dual_check_alarm():
+    app = (
+        AppBuilder.application("DualCheckAlarm")
+            .uses(AppBuilder.sensor("button1", 9))
+            .uses(AppBuilder.sensor("button2", 10))
+            .uses(AppBuilder.actuator("led", 11))
+            .hasForState("pressed")
+                .setting("led").toHigh()
+            .endState()
 
+            .hasForState("unpressed").initial()
+                .setting("led").toLow()
+            .endState()
 
+            .beginTransitionTable()
+                .from_("unpressed")
+                    .when("button1").isHigh().and_().add_sensor("button2").isHigh().end_when()
+                .go_to("pressed") 
 
+                .from_("pressed") 
+                    .when("button1").isLow().or_().add_sensor("button2").isLow().end_when()
+                .go_to("unpressed")
+            .endTransitionTable()
+            .build()
+    )
     
+    # Generate Wiring code using ToWiring visitor
+    visitor = ToWiring()
+    app.accept(visitor)
+    generated_code = visitor.get_result()
+
+    # Print the generated Wiring code
+    print(generated_code)
 
 
-
-
-
-
-
-
-if __name__ == '__main__':
-    red_button_application()
+# if __name__ == '__main__':
+    # red_button_application()
 
