@@ -24,6 +24,14 @@ We consider here that the current directory is the `antlr` directory.
     * `mvn clean package`
   3. Run the compiler using the `exec` plugin:
     * `mvn exec:java -Dexec.args="src/main/resources/red_button.arduinoml"`
+
+## Running all the scripts
+
+Firstly, make sure that the kernel is installed.
+
+We consider here that the current directory is the `antlr/src/main/resources` directory. 
+
+  1. `./run_test.sh` it will compile the ANTLR code and then run the compiler for all the files in resources directory.
     
 ## Code Description
 
