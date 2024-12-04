@@ -75,7 +75,8 @@ public class ToWiring extends Visitor<StringBuffer> {
 			return;
 		}
 		if(context.get("pass") == PASS.TWO) {
-			w(String.format("  pinMode(%d, OUTPUT); // %s [Analog Actuator] CONNECT TO A%s\n", actuator.getPin(), actuator.getName(), actuator.getPin()));
+			w(String.format("  /////////////// CONNECT %s TO PIN A%s ///////////////\n", actuator.getName(), actuator.getPin()));
+			w(String.format("  pinMode(%d, OUTPUT); // %s [Analog Actuator]\n", actuator.getPin(), actuator.getName()));
 			return;
 		}
 	}
@@ -86,7 +87,8 @@ public class ToWiring extends Visitor<StringBuffer> {
 			return;
 		}
 		if(context.get("pass") == PASS.TWO) {
-			w(String.format("  pinMode(%d, OUTPUT); // %s [Digital Actuator] CONNECT TO D%s\n", actuator.getPin(), actuator.getName(), actuator.getPin()));
+			w(String.format("  /////////////// CONNECT %s TO PIN D%s ///////////////\n", actuator.getName(), actuator.getPin()));
+			w(String.format("  pinMode(%d, OUTPUT); // %s [Digital Actuator]\n", actuator.getPin(), actuator.getName()));
 			return;
 		}
 	}
@@ -99,7 +101,8 @@ public class ToWiring extends Visitor<StringBuffer> {
 			return;
 		}
 		if(context.get("pass") == PASS.TWO) {
-			w(String.format("  pinMode(%d, INPUT);  // %s [Analog Sensor] CONNECT TO A%s\n", sensor.getPin(), sensor.getName(), sensor.getPin()));
+			w(String.format("  /////////////// CONNECT %s TO PIN A%s ///////////////\n", sensor.getName(), sensor.getPin()));
+			w(String.format("  pinMode(%d, INPUT);  // %s [Analog Sensor]\n", sensor.getPin(), sensor.getName()));
 			return;
 		}
 	}
@@ -112,6 +115,7 @@ public class ToWiring extends Visitor<StringBuffer> {
 			return;
 		}
 		if(context.get("pass") == PASS.TWO) {
+			w(String.format("  /////////////// CONNECT %s TO PIN D%s ///////////////\n", sensor.getName(), sensor.getPin()));
 			w(String.format("  pinMode(%d, INPUT);  // %s [Digital Sensor] CONNECT TO D%s\n", sensor.getPin(), sensor.getName(), sensor.getPin()));
 			return;
 		}
