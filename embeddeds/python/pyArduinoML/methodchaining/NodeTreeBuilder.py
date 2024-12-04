@@ -90,6 +90,7 @@ class NodeTreeBuilder:
             self.local = node
             if tokens[1] != "==":
                 raise ValueError(f"Digital condition should have '==' as comparator, not: {tokens[1]}")
+        
         else:
             # AnalogCondition
             is_constant = self.parent.parent.is_constant(tokens[2])
@@ -101,8 +102,13 @@ class NodeTreeBuilder:
                 except ValueError:
                     raise ValueError(f"Invalid value in analog condition: {tokens[2]} is not a float nor a known constant")
 
-                value = self.parent.parent.value_already_present(float_value)
-                if value is None:
+                
+                # Check for existing constant with this value
+                constant_already_present = self.parent.parent.value_already_present(float_value)
+                #!TODO - Correct the error here 
+                if constant_already_present is not None:
+                    value = constant_already_present
+                else:
                     value = Constant(ConditionTreeBuilder.get_new_name_for_constant(), float_value)
                     self.parent.parent.add_constant(value)
 
@@ -116,6 +122,7 @@ class NodeTreeBuilder:
             node.comparator = comparator  # Use attribute assignment
 
             self.local = node
+
 
     def translate_comparator(self, token):
         """

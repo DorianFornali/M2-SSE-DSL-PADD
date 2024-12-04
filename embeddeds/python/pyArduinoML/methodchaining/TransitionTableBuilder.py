@@ -94,10 +94,11 @@ class TransitionTableBuilder:
         :param value: float, the value to check.
         :return: Constant instance or None.
         """
-        for constant in self.constants.values():
+        for key, constant in self.constants.items():
             if constant.value == value:
                 return constant
         return None
+
     
     def add_constant(self, constant):
         """
@@ -105,4 +106,9 @@ class TransitionTableBuilder:
 
         :param constant: Constant, the constant to add.
         """
+        existing_constant = self.value_already_present(constant.value)
+        if existing_constant:
+            print(f"Constant with name {constant.name} already exists: {existing_constant.value}")
+            return  # Do not add the constant again
         self.constants[constant.name] = constant
+        self.parent.the_app.add_constant(constant)

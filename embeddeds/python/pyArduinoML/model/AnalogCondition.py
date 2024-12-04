@@ -9,7 +9,7 @@ class AnalogCondition(Condition):
     Represents an analog condition based on a sensor's value, a constant, and a comparator.
     """
 
-    def __init__(self, value: Constant, comparator: Comparator):
+    def __init__(self, value: Constant = None, comparator: Comparator = None):
         """
         Constructor for AnalogCondition.
 
@@ -83,3 +83,6 @@ class AnalogCondition(Condition):
             return self.sensor.value >= self.value.value
         else:
             raise ValueError("Invalid comparator")
+
+    def accept(self, visitor):
+        visitor.visit_analog_condition(self)

@@ -10,7 +10,7 @@ class App(NamedElement):
     Represents an ArduinoML application containing bricks, states, constants, and an initial state.
     """
 
-    def __init__(self, name: str, bricks: List[Brick], states: List[State], initial: State, constants: List[Constant] = None):
+    def __init__(self, name: str, bricks: List[Brick], states: List[State], initial: State, constants: List[Constant]):
         """
         Constructor for App.
 
@@ -25,7 +25,7 @@ class App(NamedElement):
         self._name = name
         self._bricks = bricks
         self._states = states
-        self._constants = constants if constants is not None else []
+        self._constants = constants 
         self._initial = initial
 
     @property
@@ -92,13 +92,19 @@ class App(NamedElement):
         """
         return self._constants
 
-    def add_constant(self, constant: Constant):
+    def add_constant(self, constant):
         """
-        Adds a constant to the application.
+        Add a constant globally to the AppBuilder.
 
         :param constant: Constant, the constant to add.
         """
-        self._constants.append(constant)
+        if (self.constants is None):
+            self.constants = {}
+        
+        if constant.name in self.constants:
+            print(f"Constant with name {constant.name} already exists.")
+            return
+        self.constants.append(constant)
 
     def accept(self, visitor):
         visitor.visit_app(self)  

@@ -101,17 +101,16 @@ class AppBuilder:
 
         return TransitionTableBuilder(self, state_table, sensor_table, constant_table)
 
-    def constant(self, name, value):
-        """
-        Adds a constant.
+    # def add_constant(self, constant):
+    #     """
+    #     Adds a constant.
 
-        :param name: String, name of the constant
-        :param value: int, value of the constant
-        :return: AppBuilder, the current builder
-        """
-        from pyArduinoML.model.Constant import Constant
-        self.constants.append(Constant(name, value))
-        return self
+    #     :param name: String, name of the constant
+    #     :param value: int, value of the constant
+    #     :return: AppBuilder, the current builder
+    #     """
+    #     self.the_app.add_constant(constant)
+    #     return self
 
     def initial(self, state_name):
         """

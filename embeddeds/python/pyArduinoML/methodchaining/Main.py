@@ -159,6 +159,40 @@ def dual_check_alarm():
     # Print the generated Wiring code
     print(generated_code)
 
+def fire_detection():
+    app = (
+        AppBuilder.application("FireDetection")
+            .uses(AppBuilder.sensor("thermometre", 1)) 
+            .uses(AppBuilder.actuator("alarm", 11))
+            .hasForState("idle").initial()
+                .setting("alarm").toLow()
+            .endState()
+
+            .hasForState("fireDetected") 
+                .setting("alarm").toHigh()
+            .endState()
+
+            .beginTransitionTable()
+                .from_("idle")
+                    .when("thermometre").greater_than("57") 
+                    .end_when()
+                .go_to("fireDetected")
+
+                .from_("fireDetected")
+                    .when("thermometre").less_or_equals("57")
+                    .end_when()
+                .go_to("idle")
+            .endTransitionTable()
+            .build()
+    )
+
+    # Generate Wiring code using ToWiring visitor
+    visitor = ToWiring()
+    app.accept(visitor)
+    generated_code = visitor.get_result()
+
+    # Print the generated Wiring code
+    print(generated_code)
 
 # if __name__ == '__main__':
     # red_button_application()

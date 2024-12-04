@@ -35,11 +35,9 @@ class TransitionBuilder:
         :param sensor_name: str, the name of the sensor (optional).
         :return: ConditionTreeBuilder
         """
-        print ("TransitionBuilder.when with: ", sensor_name)
         self.condition_tree_builder = ConditionTreeBuilder(self)
         if sensor_name:
             self.condition_tree_builder.add_sensor(sensor_name)
-            print("The setted sensor:", self.condition_tree_builder.sensor)
         return self.condition_tree_builder
 
     def go_to(self, target_state_name):

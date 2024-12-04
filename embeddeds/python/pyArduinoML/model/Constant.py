@@ -48,3 +48,11 @@ class Constant:
         :param value: float, the numeric value to set.
         """
         self._value = value
+
+    def accept(self, visitor):
+        """
+        Accept a visitor to visit this Constant.
+
+        :param visitor: a visitor.
+        """
+        visitor.visit_constant(self)

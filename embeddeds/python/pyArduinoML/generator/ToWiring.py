@@ -1,5 +1,6 @@
 from pyArduinoML.model.OPERATOR import OPERATOR
 from pyArduinoML.model.SIGNAL import Signal
+from pyArduinoML.model.COMPARATOR import Comparator
 
 class ToWiring:
     """
@@ -45,6 +46,14 @@ class ToWiring:
         self.w("};")
         if app.initial:
             self.w(f"STATE currentState = {app.initial.name};")
+        
+        if (len(app.constants) > 0):
+            self.w("\n// Constants")
+        
+        for constant in app.constants:
+            self.w(f"const float {constant.name} = {constant.value} ;\n")
+        
+        
         for brick in app.bricks:
             brick.accept(self)
 
@@ -121,6 +130,24 @@ class ToWiring:
         sensor_pin = condition.sensor.pin
         signal_value = "HIGH" if condition.value == Signal.HIGH else "LOW"
         self.w(f"digitalRead({sensor_pin}) == {signal_value}")
+
+    def visit_analog_condition(self, condition):
+        """
+        Visit an AnalogCondition and generate Wiring code.
+
+        :param condition: AnalogCondition instance.
+        """
+        sensor_pin = condition.sensor.pin 
+        comparator_str = {
+            Comparator.LT: "<",
+            Comparator.GT: ">",
+            Comparator.EQ: "==",
+            Comparator.NEQ: "!=",
+            Comparator.LEQ: "<=",
+            Comparator.GEQ: ">="
+        }[condition.comparator]
+        self.w(f" analogRead({sensor_pin}) {comparator_str} {condition.value.name} ")
+
 
     def visit_time_transition(self, transition):
         if self.context['pass'] == 'TWO':
